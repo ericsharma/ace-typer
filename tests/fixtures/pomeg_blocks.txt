@@ -1,0 +1,568 @@
+##### frlg-box-14-exit-biosless.html
+Box  1: z L o o k F R n [zLookFRn]
+Box  2: 5 R n n U U n   [5RnnUUn]
+Box  3: A A y 2 ? q     [AAy2?q]
+Box  4: A               [A]
+Box  5: A               [A]
+Box  6: _ F o H I o o r [ FoHIoor]
+Box  7: x n             [xn]
+Boxes 8 to 13: (leave as is)
+Box 14: _ F o           [ Fo]
+##### frlg-box-14-exit-biosless.html
+Box  1: C C U n n R . o [CCUnnR.o]
+Box  2: P R o / G w m   [PRo/Gwm]
+Box  3: A A R G . m     [AARG.m]
+Box  4: A / F Q m       [A/FQm]
+Box  5: D F Q m         [DFQm]
+Box  6: A               [A]
+Box  7: A               [A]
+Box  8: A               [A]
+Box  9: A               [A]
+Box 10: A               [A]
+Box 11: A               [A]
+Box 12: A               [A]
+Box 13: A               [A]
+Box 14: (leave as is)
+##### frlg-box-14-exit.html
+Box 14: U . o _ _ , o a [U.o  ,oa]
+##### frlg-box-14-exit.html
+Box  1: C C U n n R . o [CCUnnR.o]
+Box  2: P R o / G w m   [PRo/Gwm]
+Box  3: A A R G . m     [AARG.m]
+Box  4: A / F Q m       [A/FQm]
+Box  5: D F Q m         [DFQm]
+Box  6: A               [A]
+Box  7: A               [A]
+Box  8: A               [A]
+Box  9: A               [A]
+Box 10: A               [A]
+Box 11: A               [A]
+Box 12: A               [A]
+Box 13: A               [A]
+Box 14: (leave as is)
+##### frlg-exit-code-bootstrap.html
+Box  1: 4 C U n n R … o [4CUnnR…o]
+Box  2: P R o / F Q m   [PRo/FQm]
+Box  3: A A s K … o     [AAsK…o]
+Box  4: A v I ? n       [AvI?n]
+Box  5: U N ? n _ F ! q [UN?n F!q]
+Box  6: F … o F ‘ ! n   [F…oF‘!n]
+Box  7: A A v J ? n     [AAvJ?n]
+Box  8: A U T R o       [AUTRo]
+Box  9: … G Q m ’ G Q m […GQm’GQm]
+Box 10: ? … o _ F ! q   [?…o F!q]
+Box 11: A A … ” ! n     [AA…”!n]
+Box 12: A C J 9 n       [ACJ9n]
+Box 13: k R R o _ F ! q [kRRo F!q]
+##### frlg-exit-code-bootstrap.html
+Box  1: 4 C U n n R … o [4CUnnR…o]
+Box  2: P R o / F Q m   [PRo/FQm]
+Box  3: A A s K … o     [AAsK…o]
+Box  4: A v I ? n       [AvI?n]
+Box  5: U N ? n _ F ! q [UN?n F!q]
+Box  6: F … o F ‘ ! n   [F…oF‘!n]
+Box  7: A A v J ? n     [AAvJ?n]
+Box  8: A U T R o       [AUTRo]
+Box  9: … G Q m ’ G Q m […GQm’GQm]
+Box 10: ? … o _ F ! q   [?…o F!q]
+Box 11: A A … » ! n     [AA…»!n]
+Box 12: A C J 9 n       [ACJ9n]
+Box 13: k R R o _ F ! q [kRRo F!q]
+##### frlg-exit-code-bootstrap.html
+Box  1: 4 C U n n R … o [4CUnnR…o]
+Box  2: P R o / F Q m   [PRo/FQm]
+Box  3: A A s K … o     [AAsK…o]
+Box  4: A v I ? n       [AvI?n]
+Box  5: U N ? n _ F ! q [UN?n F!q]
+Box  6: F … o F ‘ ! n   [F…oF‘!n]
+Box  7: A A v J ? n     [AAvJ?n]
+Box  8: A U T R o       [AUTRo]
+Box  9: … G Q m ’ G Q m […GQm’GQm]
+Box 10: ? … o _ F ! q   [?…o F!q]
+Box 11: A A … “ ! n     [AA…“!n]
+Box 12: A C J 9 n       [ACJ9n]
+Box 13: k R R o _ F ! q [kRRo F!q]
+##### frlg-exit-code-bootstrap.html
+Box  1: 00 00 00 00
+Box  2: 00 00 00 00
+Box  3: 03 00 8F E2
+Box  4: 0F 00 00 EA
+Box  5: 00 00 00 02
+Box  6: 00 20 00 BD
+Box  7: 00 00 00 00
+Box  8: 0F 00 00 00
+Box  9: 0F 00 00 00
+Box 10: 00 00 00 00
+Box 11: 00 00 00 00
+Box 12: 00 00 00 00
+Box 13: 00 00 00 00
+Box 14: 00 00 00 00
+##### frlg-exit-code-bootstrap.html
+Box  1: m … l o y ♀ Q o [m…loy♀Qo]
+Box  2: F U n m ” Q o   [FUnm”Qo]
+Box  3: A A _ “ ? q z   [AA “?qz]
+Box  4: v   [v]
+##### frlg-exit-code-bootstrap.html
+Box  1: m … l o y ♀ Q o [m…loy♀Qo]
+Box  2: F U n m » Q o   [FUnm»Qo]
+Box  3: A A _ « ? q z   [AA «?qz]
+Box  4: v   [v]
+##### frlg-exit-code-bootstrap.html
+Box  1: m … l o y ♀ Q o [m…loy♀Qo]
+Box  2: F U n m “ Q o   [FUnm“Qo]
+Box  3: A A _ „ ? q z   [AA „?qz]
+Box  4: v   [v]
+##### frlg-faq.html
+Original:
+Box 4: E _ F R m _ _ _ [E FRm   ]
+
+Adjusted:
+Box 4: E _ F R m       [E FRm]
+##### frlg-faq.html
+Original:
+Box 11: … o _ _ _ _ _ _ […o      ]
+
+Adjusted:
+Box 11: . o             [.o]
+##### frlg-faq.html
+Original:
+Box 10: _ F o H I C o r [ FoHICor]
+Box 11: B n             [Bn]
+
+Adjusted:
+Box 10: _ F o H I o o r [ FoHIoor]
+Box 11: x n             [xn]
+##### frlg-grab-ace-exit.html
+Box 10: _ _ _ _ _ … o a [     …oa]
+Box 11: … o […o]
+##### frlg-grab-ace-exit.html
+Box 10: _ F o * * * * a [ Fo****a]
+Box 11: … o […o]
+* = extra instruction
+##### frlg-grab-ace-exit.html
+Box 14: _ F o ì [ Foì]
+##### frlg-grab-ace-exit.html
+E3E0B6EE    MVN r11, #0xEE00000
+E2CBB0DF    SBC r11, #0xDF
+E2CBB6FF    SBC r11, #0xFF00000 ; r11 = E12FFF1E
+E2CFCFE2    SBC r12, pc, #0x388 ; r12 = Address of Box 14 name - 0x3ED
+0000FF00    ; (filler)
+E5ACB3ED    STR r11, [r12, #0x3ED]! ; Store BX LR in Box 14 name
+...
+E3C000FF    BIC r0, #0xFF
+00000000    ; becomes BX lr (E12FFF1E)
+##### frlg-grab-ace-exit.html
+Box 14: U … o _ _ … o a [U…o  …oa]
+##### frlg-grab-ace-exit.html
+E2CFBDA5    SBC r11, pc, #0x2940 ; r11 = address of Box 10, Slot 19 + 9
+E3B0CCE2    MOVS r12, #0xE200
+E3CCCAFF    BIC r12, #0xFF000 ; r12 = 0200, hasSpecies set
+E1CBC0BA    STRH r12, [r11, #0xA] ; Store hasSpecies flag
+0000FF00    ; (filler)
+E3B0C5E7    MOVS r12, #0x39C00000
+00FF0000    ; (filler)
+E2ACC3EA    ADC r12, #0xA8000003
+FF000000    ; (filler)
+E2ACC8CF    ADC r12, #0xCF0000 ; r12 = E28F0003 (ADD r0, pc, #0x3)
+E5ABC000    STR r12, [r11]! ; Store in nickname chars 0-3
+E3B0C0FF    MOVS r12, #0xFF
+E2ABB3C0    ADC r11, #0x3 ; r11 = Box 10, Slot 19 + 12
+0000FF00    ; (filler)
+E2ACC4EA    ADC r12, #0xEA000000
+00FF0000    ; (filler)
+E3CCCECF    BIC r12, #0xCF0 ; r12 = EA00000F (B pc+0x44)
+FF000000    ; (filler)
+E1CBC1B0    STRH r12, [r11, #0x10] ; Store checksum
+E1CBC1B4    STRH r12, [r11, #0x14] ; Store species
+E3B0ACFF    MOVS r10, #0xFF00 ; Temporarily store in r10
+E5ABC000    STR r12, [r11]! ; Store in nickname chars 4-7
+0000FF00    ; (filler)
+E2ABB2B0    ADC r11, #0xB ; r11 = Box 10, Slot 19 + 23
+00FF0000    ; (filler)
+E2AAC4BD    ADC r10, r12, #0xBD000000 ; move r10 into r12
+FF000000    ; (filler)
+E3CCCCDF    BIC r12, #0xDF00 ; r12 = BD002000 (MOV r0, #0 ; POP {pc})
+E5ABC000    STR r12, [r11]! ; Store in OT
+##### frlg-hex-writer.html
+### CODE 1 ###
+Box  1: C C U H 7 T … o [CCUH7T…o]
+Box  2: A A A 7 F Q q   [AAA7FQq]
+Box  3: A A n F … o     [AAnF…o]
+Box  4: A 9 F Q q       [A9FQq]
+Box  5: t R … o , F ? n [tR…o,F?n]
+Box  6: A A A C P Q m   [AAACPQm]
+Box  7: A A o F … o     [AAoF…o]
+Box  8: A ” F Q q       [A”FQq]
+Box  9: F F … o ’ F Q q [FF…o’FQq]
+Box 10: A A A N G … o   [AAANG…o]
+Box 11: A A ♀ F w q     [AA♀Fwq]
+Box 12: A s R … o       [AsR…o]
+Box 13: d F ? n ‘ F Q m [dF?n‘FQm]
+
+### CODE 2 ###
+Box  1: C C U H W M … o [CCUHWM…o]
+Box  2: A A A k J ? n   [AAAkJ?n]
+Box  3: A A W P ? n     [AAWP?n]
+Box  4: A “ F ? n       [A“F?n]
+Box  5: A F ! q P K … o [AF!qPK…o]
+Box  6: A A A t P ? n   [AAAtP?n]
+Box  7: A A 0 Q ? n     [AA0Q?n]
+Box  8: A G T ? n       [AGT?n]
+Box  9: T R ! s H K … o [TR!sHK…o]
+Box 10: A A A ” H ? n   [AAA”H?n]
+Box 11: A A z R ? n     [AAzR?n]
+Box 12: A J R ? n       [AJR?n]
+Box 13: T R ! s         [TR!s]
+
+### CODE 3 ###
+Box  1: C C U H z K … o [CCUHzK…o]
+Box  2: A A A 0 L ? n   [AAA0L?n]
+Box  3: A A Q P ? n     [AAQP?n]
+Box  4: A M F ! q       [AMF!q]
+Box  5: 1 H l o I M ? n [1HloIM?n]
+Box  6: A A A l P ? n   [AAAlP?n]
+Box  7: A A F H ? n     [AAFH?n]
+Box  8: A T R ! s       [ATR!s]
+Box  9: L I … o R M R n [LI…oRMRn]
+Box 10: A A A Z Q R n   [AAAZQRn]
+Box 11: A A T R ! s     [AATR!s]
+Box 12: A               [A]
+Box 13: A               [A]
+
+### CODE 4 ###
+Box  1: C C U H G H … o [CCUHGH…o]
+Box  2: A A A t M ? n   [AAAtM?n]
+Box  3: A A . R ? n     [AA.R?n]
+Box  4: A C U ? n       [ACU?n]
+Box  5: Y F ! q N I l o [YF!qNIlo]
+Box  6: A A A Y M ? n   [AAAYM?n]
+Box  7: A A l P ? n     [AAlP?n]
+Box  8: A … H ? n       [A…H?n]
+Box  9: T R ! s P K … o [TR!sPK…o]
+Box 10: A A A 6 P ? n   [AAA6P?n]
+Box 11: A A C S ? n     [AACS?n]
+Box 12: A G F ? n       [AGF?n]
+Box 13: T R ! s         [TR!s]
+
+### CODE 5 ###
+Box  1: C C U H , I l o [CCUH,Ilo]
+Box  2: A A A q M ? n   [AAAqM?n]
+Box  3: A A P P ? n     [AAPP?n]
+Box  4: A F I ? n       [AFI?n]
+Box  5: k F ! q X H … o [kF!qXH…o]
+Box  6: A A A 1 M ? n   [AAA1M?n]
+Box  7: A A x R ? n     [AAxR?n]
+Box  8: A 0 R ? n       [A0R?n]
+Box  9: C U ? H T R ! s [CU?HTR!s]
+Box 10: A A A 4 J l o   [AAA4Jlo]
+Box 11: A A 0 I ? n     [AA0I?n]
+Box 12: A k M ? n       [AkM?n]
+Box 13: e P ? n T R ! s [eP?nTR!s]
+
+### CODE 6 ###
+Box  1: C C U H N I l o [CCUHNIlo]
+Box  2: A A A b M ? n   [AAAbM?n]
+Box  3: A A c R ? n     [AAcR?n]
+Box  4: A 2 S ? n       [A2S?n]
+Box  5: H F ? n w F ! q [HF?nwF!q]
+Box  6: A A A l K … o   [AAAlK…o]
+Box  7: A A 1 L ? n     [AA1L?n]
+Box  8: A E O ? n       [AEO?n]
+Box  9: G S ? n T R ! s [GS?nTR!s]
+Box 10: A A A m F l o   [AAAmFlo]
+Box 11: A A y L R o     [AAyLRo]
+Box 12: A m H R o       [AmHRo]
+Box 13: _ H ? n T R ! s [ H?nTR!s]
+##### frlg-hex-writer.html
+### CODE 1 ###
+Box  1: C C U H 7 T … o [CCUH7T…o]
+Box  2: A A A 7 F Q q   [AAA7FQq]
+Box  3: A A n F … o     [AAnF…o]
+Box  4: A 9 F Q q       [A9FQq]
+Box  5: t R … o , F ? n [tR…o,F?n]
+Box  6: A A A C P Q m   [AAACPQm]
+Box  7: A A o F … o     [AAoF…o]
+Box  8: A » F Q q       [A»FQq]
+Box  9: F F … o ’ F Q q [FF…o’FQq]
+Box 10: A A A N G … o   [AAANG…o]
+Box 11: A A ♀ F w q     [AA♀Fwq]
+Box 12: A s R … o       [AsR…o]
+Box 13: d F ? n ‘ F Q m [dF?n‘FQm]
+
+### CODE 2 ###
+Box  1: C C U H W M … o [CCUHWM…o]
+Box  2: A A A k J ? n   [AAAkJ?n]
+Box  3: A A W P ? n     [AAWP?n]
+Box  4: A « F ? n       [A«F?n]
+Box  5: A F ! q P K … o [AF!qPK…o]
+Box  6: A A A t P ? n   [AAAtP?n]
+Box  7: A A 0 Q ? n     [AA0Q?n]
+Box  8: A G T ? n       [AGT?n]
+Box  9: T R ! s H K … o [TR!sHK…o]
+Box 10: A A A » H ? n   [AAA»H?n]
+Box 11: A A z R ? n     [AAzR?n]
+Box 12: A J R ? n       [AJR?n]
+Box 13: T R ! s         [TR!s]
+
+### CODE 3 ###
+Box  1: C C U H z K … o [CCUHzK…o]
+Box  2: A A A 0 L ? n   [AAA0L?n]
+Box  3: A A Q P ? n     [AAQP?n]
+Box  4: A M F ! q       [AMF!q]
+Box  5: 1 H l o I M ? n [1HloIM?n]
+Box  6: A A A l P ? n   [AAAlP?n]
+Box  7: A A F H ? n     [AAFH?n]
+Box  8: A T R ! s       [ATR!s]
+Box  9: L I … o R M R n [LI…oRMRn]
+Box 10: A A A Z Q R n   [AAAZQRn]
+Box 11: A A T R ! s     [AATR!s]
+Box 12: A               [A]
+Box 13: A               [A]
+
+### CODE 4 ###
+Box  1: C C U H G H … o [CCUHGH…o]
+Box  2: A A A t M ? n   [AAAtM?n]
+Box  3: A A . R ? n     [AA.R?n]
+Box  4: A C U ? n       [ACU?n]
+Box  5: Y F ! q N I l o [YF!qNIlo]
+Box  6: A A A Y M ? n   [AAAYM?n]
+Box  7: A A l P ? n     [AAlP?n]
+Box  8: A … H ? n       [A…H?n]
+Box  9: T R ! s P K … o [TR!sPK…o]
+Box 10: A A A 6 P ? n   [AAA6P?n]
+Box 11: A A C S ? n     [AACS?n]
+Box 12: A G F ? n       [AGF?n]
+Box 13: T R ! s         [TR!s]
+
+### CODE 5 ###
+Box  1: C C U H , I l o [CCUH,Ilo]
+Box  2: A A A q M ? n   [AAAqM?n]
+Box  3: A A P P ? n     [AAPP?n]
+Box  4: A F I ? n       [AFI?n]
+Box  5: k F ! q X H … o [kF!qXH…o]
+Box  6: A A A 1 M ? n   [AAA1M?n]
+Box  7: A A x R ? n     [AAxR?n]
+Box  8: A 0 R ? n       [A0R?n]
+Box  9: C U ? H T R ! s [CU?HTR!s]
+Box 10: A A A 4 J l o   [AAA4Jlo]
+Box 11: A A 0 I ? n     [AA0I?n]
+Box 12: A k M ? n       [AkM?n]
+Box 13: e P ? n T R ! s [eP?nTR!s]
+
+### CODE 6 ###
+Box  1: C C U H N I l o [CCUHNIlo]
+Box  2: A A A b M ? n   [AAAbM?n]
+Box  3: A A c R ? n     [AAcR?n]
+Box  4: A 2 S ? n       [A2S?n]
+Box  5: H F ? n w F ! q [HF?nwF!q]
+Box  6: A A A l K … o   [AAAlK…o]
+Box  7: A A 1 L ? n     [AA1L?n]
+Box  8: A E O ? n       [AEO?n]
+Box  9: G S ? n T R ! s [GS?nTR!s]
+Box 10: A A A m F l o   [AAAmFlo]
+Box 11: A A y L R o     [AAyLRo]
+Box 12: A m H R o       [AmHRo]
+Box 13: _ H ? n T R ! s [ H?nTR!s]
+##### frlg-hex-writer.html
+### CODE 1 ###
+Box  1: C C U H 7 T … o [CCUH7T…o]
+Box  2: A A A 7 F Q q   [AAA7FQq]
+Box  3: A A n F … o     [AAnF…o]
+Box  4: A 9 F Q q       [A9FQq]
+Box  5: t R … o , F ? n [tR…o,F?n]
+Box  6: A A A C P Q m   [AAACPQm]
+Box  7: A A o F … o     [AAoF…o]
+Box  8: A “ F Q q       [A“FQq]
+Box  9: F F … o ’ F Q q [FF…o’FQq]
+Box 10: A A A N G … o   [AAANG…o]
+Box 11: A A ♀ F w q     [AA♀Fwq]
+Box 12: A s R … o       [AsR…o]
+Box 13: d F ? n ‘ F Q m [dF?n‘FQm]
+
+### CODE 2 ###
+Box  1: C C U H W M … o [CCUHWM…o]
+Box  2: A A A k J ? n   [AAAkJ?n]
+Box  3: A A W P ? n     [AAWP?n]
+Box  4: A „ F ? n       [A„F?n]
+Box  5: A F ! q P K … o [AF!qPK…o]
+Box  6: A A A t P ? n   [AAAtP?n]
+Box  7: A A 0 Q ? n     [AA0Q?n]
+Box  8: A G T ? n       [AGT?n]
+Box  9: T R ! s H K … o [TR!sHK…o]
+Box 10: A A A “ H ? n   [AAA“H?n]
+Box 11: A A ü R ? n     [AAüR?n]
+Box 12: A B R ? n       [ABR?n]
+Box 13: T R ! s         [TR!s]
+
+### CODE 3 ###
+Box  1: C C U H z K … o [CCUHzK…o]
+Box  2: A A A 0 L ? n   [AAA0L?n]
+Box  3: A A Q P ? n     [AAQP?n]
+Box  4: A M F ! q       [AMF!q]
+Box  5: 1 H l o I M ? n [1HloIM?n]
+Box  6: A A A l P ? n   [AAAlP?n]
+Box  7: A A F H ? n     [AAFH?n]
+Box  8: A T R ! s       [ATR!s]
+Box  9: L I … o R M R n [LI…oRMRn]
+Box 10: A A A Z Q R n   [AAAZQRn]
+Box 11: A A T R ! s     [AATR!s]
+Box 12: A               [A]
+Box 13: A               [A]
+
+### CODE 4 ###
+Box  1: C C U H G H … o [CCUHGH…o]
+Box  2: A A A t M ? n   [AAAtM?n]
+Box  3: A A . R ? n     [AA.R?n]
+Box  4: A C U ? n       [ACU?n]
+Box  5: Y F ! q N I l o [YF!qNIlo]
+Box  6: A A A Y M ? n   [AAAYM?n]
+Box  7: A A l P ? n     [AAlP?n]
+Box  8: A … H ? n       [A…H?n]
+Box  9: T R ! s P K … o [TR!sPK…o]
+Box 10: A A A 8 P ? n   [AAA8P?n]
+Box 11: A A ü T ? n     [AAüT?n]
+Box 12: A 0 F ? n       [A0F?n]
+Box 13: T R ! s         [TR!s]
+
+### CODE 5 ###
+Box  1: C C U H , I l o [CCUH,Ilo]
+Box  2: A A A q M ? n   [AAAqM?n]
+Box  3: A A P P ? n     [AAPP?n]
+Box  4: A F I ? n       [AFI?n]
+Box  5: k F ! q Ö H … o [kF!qÖH…o]
+Box  6: A A A 1 M ? n   [AAA1M?n]
+Box  7: A A z R ? n     [AAzR?n]
+Box  8: A 0 R ? n       [A0R?n]
+Box  9: Ö F ? n T R ! s [ÖF?nTR!s]
+Box 10: A A A 4 J l o   [AAA4Jlo]
+Box 11: A A 0 I ? n     [AA0I?n]
+Box 12: A k M ? n       [AkM?n]
+Box 13: e P ? n T R ! s [eP?nTR!s]
+
+### CODE 6 ###
+Box  1: C C U H b M … o [CCUHbM…o]
+Box  2: A A A z H ? n   [AAAzH?n]
+Box  3: A A ü R ? n     [AAüR?n]
+Box  4: A 6 T ? n       [A6T?n]
+Box  5: w F ! q l K … o [wF!qlK…o]
+Box  6: A A A 1 L ? n   [AAA1L?n]
+Box  7: A A E O ? n     [AAEO?n]
+Box  8: A G S ? n       [AGS?n]
+Box  9: T R ! s m F l o [TR!smFlo]
+Box 10: A A A y L R o   [AAAyLRo]
+Box 11: A A m H R o     [AAmHRo]
+Box 12: A _ F ? n       [A F?n]
+Box 13: T R ! s         [TR!s]
+##### frlg-hex-writer.html
+Box  1: F0 00 00 00
+Box  2: F0 00 00 00
+Box  3: BF AE CD DC
+Box  4: A5 E6 DF FF
+Box  5: 00 00 03 02
+Box  6: BF AE CD DC
+Box  7: A5 E6 DF 00
+Box  8: 53 00 00 00
+Box  9: 53 00 00 00
+Boxes 10-14: 00 00 00 00
+##### frlg-hex-writer.html
+Box  1: 46 C0 8F E2
+Box  2: 00 80 A0 E3
+Box  3: 08 90 9C E7
+Box  4: 04 80 88 E2
+Box  5: FF FF FF FF
+Box  6: 00 00 59 E3
+Box  7: 08 C0 8C 10
+Box  8: 20 F0 4F 12
+Box  9: 38 00 58 E3
+Box 10: FF FF FF FF
+Box 11: 28 F0 4F 32
+Box 12: 02 90 1F E5
+Box 13: 09 F0 8F E0
+Box 14: 74 09 00 00
+##### frlg-hex-writer.html
+Box  1: 00 B0 A0 E3
+Box  2: 01 B0 9B E2
+Box  3: 40 F0 8F E2
+Box  4: 00 00 00 00
+Box  5: 00 00 00 02
+Box  6: 00 00 00 00
+Box  7: 00 00 00 00
+Box  8: D0 0E 00 00
+Boxes 9-14: 00 00 00 00
+##### frlg-hex-writer.html
+Box  1: x “ U n … F g m [x“Un…Fgm]
+Box  2: A A A , G ? n   [AAA,G?n]
+Box  3: A A 3 G R n     [AA3GRn]
+Box  4: A … F Q m       [A…FQm]
+Box  5: 4 C U n F “ Q n [4CUnF“Qn]
+Box  6: A A A A _ B m   [AAAA Bm]
+Box  7: A A ” … h m     [AA”…hm]
+Box  8: A _ … ! l       [A …!l]
+Box  9: X R U n / D R m [XRUn/DRm]
+Box 10: A               [A]
+Box 11: A               [A]
+Box 12: A               [A]
+Box 13: A               [A]
+##### frlg-hex-writer.html
+Box  1: x « U n … F g m [x«Un…Fgm]
+Box  2: A A A , G ? n   [AAA,G?n]
+Box  3: A A 3 G R n     [AA3GRn]
+Box  4: A … F Q m       [A…FQm]
+Box  5: 4 C U n F « Q n [4CUnF«Qn]
+Box  6: A A A A _ B m   [AAAA Bm]
+Box  7: A A » … h m     [AA»…hm]
+Box  8: A _ … ! l       [A …!l]
+Box  9: X R U n / D R m [XRUn/DRm]
+Box 10: A               [A]
+Box 11: A               [A]
+Box 12: A               [A]
+Box 13: A               [A]
+##### frlg-hex-writer.html
+Box  1: x „ U n … F g m [x„Un…Fgm]
+Box  2: A A A , G ? n   [AAA,G?n]
+Box  3: A A 3 G R n     [AA3GRn]
+Box  4: A … F Q m       [A…FQm]
+Box  5: 4 C U n F „ Q n [4CUnF„Qn]
+Box  6: A A A A _ B m   [AAAA Bm]
+Box  7: A A “ … h m     [AA“…hm]
+Box  8: A _ … ! l       [A …!l]
+Box  9: X R U n / D R m [XRUn/DRm]
+Box 10: A               [A]
+Box 11: A               [A]
+Box 12: A               [A]
+Box 13: A               [A]
+##### frlg-hex-writer.html
+Box  1: l … l o z ♀ Q o [l…loz♀Qo]
+Box  2: ♀ Q n F F U n   [♀QnFFUn]
+Box  3: A A g … ? q     [AAg…?q]
+Box  4: A C S U n       [ACSUn]
+Box  5: l ” Q o c … ? q [l”Qoc…?q] (change 'l' to ' ' for BX lr)
+Box  6: _ F o           [ Fo]
+##### frlg-hex-writer.html
+Box  1: l … l o z ♀ Q o [l…loz♀Qo]
+Box  2: ♀ Q n F F U n   [♀QnFFUn]
+Box  3: A A g … ? q     [AAg…?q]
+Box  4: A C S U n       [ACSUn]
+Box  5: l » Q o c … ? q [l»Qoc…?q] (change 'l' to ' ' for BX lr)
+Box  6: _ F o           [ Fo]
+##### frlg-hex-writer.html
+Box  1: l … l o z ♀ Q o [l…loz♀Qo]
+Box  2: ♀ Q n F F U n   [♀QnFFUn]
+Box  3: A A g … ? q     [AAg…?q]
+Box  4: A C S U n       [ACSUn]
+Box  5: l “ Q o c … ? q [l“Qoc…?q] (change 'l' to ' ' for BX lr)
+Box  6: _ F o _ _ _ _   [ Fo]
+##### frlg-hexwriter-setup-explanation.html
+Box  1: C C U n 7 T … o [CCUn7T…o]
+Box  2: A A A 7 F Q q   [AAA7FQq]
+Box  3: A A n F … o     [AAnF…o]
+Box  4: A 9 F Q q       [A9FQq]
+Box  5: t F … o – F Q q [tF…o–FQq]
+Box  6: A A A o F … o   [AAAoF…o]
+Box  7: A A ” F Q q     [AA”FQq]
+Box  8: A F F … o       [AFF…o]
+Box  9: ’ F Q q N G … o [’FQqNG…o]
+Box 10: A A A ♀ F w q   [AAA♀Fwq]
+Box 11: A A s R … o     [AAsR…o]
+Box 12: A d F ? n       [AdF?n]
+Box 13: ‘ F Q m         [‘FQm]

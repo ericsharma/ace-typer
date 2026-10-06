@@ -2,4 +2,4 @@
 # Run ace_typer modules with the pinned nixpkgs python + socket.io client.
 set -euo pipefail
 cd "$(dirname "$0")"
-exec nix shell --impure --expr 'with (builtins.getFlake "nixpkgs").legacyPackages.x86_64-linux; python3.withPackages (ps: with ps; [ python-socketio websocket-client requests ])' -c python3 -m "$@"
+exec nix shell --impure --expr 'with (builtins.getFlake "nixpkgs").legacyPackages.x86_64-linux; python3.withPackages (ps: with ps; [ python-socketio websocket-client requests pytest ])' -c python3 -m "$@"

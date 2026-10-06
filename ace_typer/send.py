@@ -75,6 +75,23 @@ def box_steps(name, t: Timings, next_box=True):
     return steps
 
 
+def steps_to_macro(steps):
+    """nxbt macro text: 'BUTTON 0.15s' holds a button, '0.25s' waits."""
+    lines = []
+    wait = 0.0
+    for button, seconds in steps:
+        if button is None:
+            wait += seconds
+            continue
+        if wait:
+            lines.append(f"{wait:.3f}s")
+            wait = 0.0
+        lines.append(f"{BUTTON[button]} {seconds:.3f}s")
+    if wait:
+        lines.append(f"{wait:.3f}s")
+    return "\n".join(lines)
+
+
 class Controller:
     def __init__(self, url="http://127.0.0.1:8170"):
         self.sio = socketio.Client()
@@ -102,31 +119,35 @@ class Controller:
     def _send(self, packet):
         self.sio.emit("input", json.dumps([self.index, packet]))
 
-    def _release_and_exit(self, signum, _frame):
-        # A stop in the middle of a press would leave that button held:
-        # nxbt keeps the last packet. Release first, then exit.
-        self._send(NEUTRAL)
-        time.sleep(0.1)
-        self._send(NEUTRAL)
+    def _stop_and_exit(self, signum, _frame):
+        # Stop the macro inside nxbt and release every button, then exit.
+        self.stop()
         sys.exit(128 + signum)
 
-    def run(self, steps, log=print):
-        total = sum(s for _, s in steps)
-        log(f"controller {self.index}: {len(steps)} steps, {total:.1f}s")
-        for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
-            signal.signal(sig, self._release_and_exit)
+    def stop(self):
         try:
-            for button, seconds in steps:
-                if button is None:
-                    time.sleep(seconds)
-                    continue
-                packet = copy.deepcopy(NEUTRAL)
-                packet[BUTTON[button]] = True
-                self._send(packet)
-                time.sleep(seconds)
-                self._send(NEUTRAL)
+            self.sio.call("macro_clear", self.index, timeout=5)
         finally:
             self._send(NEUTRAL)
+
+    def run(self, steps, log=print):
+        """Run steps as one nxbt macro. nxbt times every press inside the
+        controller process; sending press/release as separate socket
+        messages lost presses whenever the web app stalled."""
+        macro = steps_to_macro(steps)
+        total = sum(s for _, s in steps)
+        log(f"controller {self.index}: {len(steps)} steps, {total:.1f}s (as one nxbt macro)")
+        for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+            signal.signal(sig, self._stop_and_exit)
+        self._send(NEUTRAL)  # a non-idle direct input would pause the macro
+        macro_id = self.sio.call("macro_async", json.dumps([self.index, macro]), timeout=10)
+        start = time.monotonic()
+        while not self.sio.call("macro_done", json.dumps([self.index, macro_id]), timeout=10):
+            if time.monotonic() - start > total + 120:
+                self.stop()
+                raise RuntimeError("macro did not finish in time; stopped it")
+            time.sleep(1)
+        log(f"macro finished in {time.monotonic() - start:.1f}s")
 
     def close(self):
         self.sio.disconnect()

@@ -7,6 +7,8 @@ server never blocks.
 
 import copy
 import json
+import signal
+import sys
 import threading
 import time
 from dataclasses import dataclass
@@ -97,9 +99,19 @@ class Controller:
     def _send(self, packet):
         self.sio.emit("input", json.dumps([self.index, packet]))
 
+    def _release_and_exit(self, signum, _frame):
+        # A stop in the middle of a press would leave that button held:
+        # nxbt keeps the last packet. Release first, then exit.
+        self._send(NEUTRAL)
+        time.sleep(0.1)
+        self._send(NEUTRAL)
+        sys.exit(128 + signum)
+
     def run(self, steps, log=print):
         total = sum(s for _, s in steps)
         log(f"controller {self.index}: {len(steps)} steps, {total:.1f}s")
+        for sig in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+            signal.signal(sig, self._release_and_exit)
         try:
             for button, seconds in steps:
                 if button is None:

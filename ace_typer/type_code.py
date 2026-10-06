@@ -10,63 +10,9 @@ boxes are skipped with one RIGHT tap. The run ends on the last box's title.
 import argparse
 import sys
 
-from .keyboard import plan_name, simulate
+from .macro import box_and_advance, build_steps, preview
 from .parse import ParseError, parse
-from .send import Controller, Timings, box_steps
-
-
-def build_steps(code, timings=Timings(), first=1, last=None):
-    """Steps for boxes first..last; the cursor must start on Box `first`'s title."""
-    plan = [(n, name) for n, name in code.plan()
-            if n >= first and (last is None or n <= last)]
-    if not plan:
-        raise ValueError(f"no boxes in range {first}..{last}")
-    steps = []
-    for i, (n, name) in enumerate(plan):
-        is_last = i == len(plan) - 1
-        if name is None:
-            if not is_last:
-                steps += [("RIGHT", timings.press), (None, timings.scroll)]
-            continue
-        actions = plan_name(name)
-        if simulate(actions) != name:
-            raise AssertionError(f"box {n}: planner/simulator disagree for {name!r}")
-        steps += box_steps(name, timings, next_box=not is_last)
-    return steps
-
-
-def box_and_advance(code, n, timings=Timings()):
-    """Steps that name Box n, then scroll right to the next box that has a
-    name to type. Returns (steps, next box number or None)."""
-    box = code.boxes.get(n)
-    if box is None or box.name is None:
-        raise ValueError(f"Box {n} has no name to type in this code")
-    actions = plan_name(box.name)
-    if simulate(actions) != box.name:
-        raise AssertionError(f"box {n}: planner/simulator disagree for {box.name!r}")
-    later = [m for m, name in code.plan() if m > n and name is not None]
-    if not later:
-        return box_steps(box.name, timings, next_box=False), None
-    steps = box_steps(box.name, timings, next_box=True)
-    for _ in range(later[0] - n - 1):
-        steps += [("RIGHT", timings.press), (None, timings.scroll)]
-    return steps, later[0]
-
-
-def preview(code):
-    lines = [f"{code.title} ({code.kind})"]
-    for n in range(1, max(code.boxes) + 1):
-        box = code.boxes.get(n)
-        if box is None or box.name is None:
-            shown = "(unchanged)" if box is None else "(leave as is)"
-        else:
-            shown = f"[{box.name}]"
-        lines.append(f"  Box {n:2}: {shown}")
-        for w in (box.warnings if box else []):
-            lines.append(f"           ! {w}")
-    for w in code.warnings:
-        lines.append(f"  ! {w}")
-    return "\n".join(lines)
+from .send import Controller
 
 
 def main():

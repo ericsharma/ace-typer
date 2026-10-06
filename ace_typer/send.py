@@ -1,8 +1,7 @@
-"""Drive an nxbt controller through the nxbt web app's socket ('input' event).
+"""Drive an nxbt controller through the nxbt web app's socket.
 
-Each button is a direct-input packet held for `press` seconds, then a neutral
-packet. The web app keeps the last packet, so timing lives here and the
-server never blocks.
+Runs are sent as one nxbt macro (patched 'macro_async' event), so nxbt times
+every press inside the controller process.
 """
 
 import copy
@@ -11,11 +10,9 @@ import signal
 import sys
 import threading
 import time
-from dataclasses import dataclass
 
 import socketio
 
-from .keyboard import plan_name
 
 NEUTRAL = {
     "L_STICK": {"PRESSED": False, "X_VALUE": 0, "Y_VALUE": 0,
@@ -29,67 +26,7 @@ NEUTRAL = {
     "Y": False, "X": False, "B": False, "A": False,
 }
 
-# Game action -> Switch button (GBA SELECT = Minus, START = Plus).
-BUTTON = {
-    "UP": "DPAD_UP", "DOWN": "DPAD_DOWN", "LEFT": "DPAD_LEFT", "RIGHT": "DPAD_RIGHT",
-    "A": "A", "B": "B", "PAGE": "A", "SELECT": "MINUS", "START": "PLUS",
-}
-
-
-@dataclass
-class Timings:
-    # Hold well under the naming screen's key-repeat delay (16 frames =
-    # 267 ms, naming_screen.c): 250 ms plus Bluetooth jitter repeated D-pad
-    # presses. The 250 ms gap keeps presses from merging (0.10/0.10 lost some).
-    press: float = 0.15        # button held
-    gap: float = 0.25          # release after a button
-    menu_open: float = 1.5     # box title A -> JUMP/WALLPAPER/NAME/CANCEL menu
-    naming_open: float = 2.5   # NAME -> naming screen faded in
-    page_swap: float = 1.0     # SELECT -> next page usable
-    full_to_ok: float = 1.0    # 8th character -> cursor moved to OK
-    confirm_return: float = 3.5  # OK -> back on the PC box screen
-    scroll: float = 2.5        # RIGHT on box title -> next box shown
-
-
-def box_steps(name, t: Timings, next_box=True):
-    """(button or None, seconds) steps that name the current box and move on.
-    Starts and ends with the cursor on the box title."""
-    steps = [("A", t.press), (None, t.menu_open),
-             ("DOWN", t.press), (None, t.gap), ("DOWN", t.press), (None, t.gap),
-             ("A", t.press), (None, t.naming_open)]
-    actions = plan_name(name)
-    for i, a in enumerate(actions):
-        if a == "WAIT_FULL":
-            steps.append((None, t.full_to_ok))
-            continue
-        steps.append((a, t.press))
-        last = i == len(actions) - 1
-        if last:
-            steps.append((None, t.confirm_return))
-        elif a in ("PAGE", "SELECT"):
-            steps.append((None, t.page_swap))
-        else:
-            steps.append((None, t.gap))
-    if next_box:
-        steps += [("RIGHT", t.press), (None, t.scroll)]
-    return steps
-
-
-def steps_to_macro(steps):
-    """nxbt macro text: 'BUTTON 0.15s' holds a button, '0.25s' waits."""
-    lines = []
-    wait = 0.0
-    for button, seconds in steps:
-        if button is None:
-            wait += seconds
-            continue
-        if wait:
-            lines.append(f"{wait:.3f}s")
-            wait = 0.0
-        lines.append(f"{BUTTON[button]} {seconds:.3f}s")
-    if wait:
-        lines.append(f"{wait:.3f}s")
-    return "\n".join(lines)
+from .macro import BUTTON, Timings, box_steps, steps_to_macro  # noqa: F401 (re-export)
 
 
 class Controller:

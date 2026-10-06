@@ -97,31 +97,41 @@ MOVES = {
     "DOWN": lambda s: dpad(s, 0, 1),
     "LEFT": lambda s: dpad(s, -1, 0),
     "RIGHT": lambda s: dpad(s, 1, 0),
+    "PAGE": select,     # A on the on-screen PAGE button; same as SELECT
     "SELECT": select,
     "START": start,
 }
 
 
+def on_button(state, row):
+    page, x, y, _ = state
+    return x == COLS[page] and y == row
+
+
 @dataclass(frozen=True)
 class Costs:
-    """Relative cost of each action; SELECT carries its page-swap animation."""
+    """Relative cost of each action. Page swaps carry their animation.
+
+    use_meta=False plans with the D-pad and A only (on-screen PAGE and OK):
+    on the Switch rerelease, Plus did not act as GBA START (calibration t1).
+    """
 
     move: float = 1.0
-    select: float = 4.0
-    start: float = 1.0
+    page_swap: float = 4.0
+    use_meta: bool = False
+
+    def allowed(self, action, state):
+        if action == "PAGE":
+            return on_button(state, 0)
+        if action in ("SELECT", "START"):
+            return self.use_meta
+        return True
 
     def of(self, action):
-        if action == "SELECT":
-            return self.select
-        if action == "START":
-            return self.start
-        return self.move
+        return self.page_swap if action in ("PAGE", "SELECT") else self.move
 
 
-def path_to_char(state, target, costs=Costs()):
-    """Cheapest action list from state to a cursor on `target`, plus end state."""
-    if target not in CHARSET:
-        raise ValueError(f"character {target!r} is not on the keyboard")
+def _search(state, is_goal, costs):
     dist = {state: 0.0}
     prev = {}
     heap = [(0.0, 0, state)]
@@ -130,7 +140,7 @@ def path_to_char(state, target, costs=Costs()):
         d, _, s = heapq.heappop(heap)
         if d > dist[s]:
             continue
-        if char_at(s[0], s[1], s[2]) == target:
+        if is_goal(s):
             end = s
             actions = []
             while s in prev:
@@ -138,6 +148,8 @@ def path_to_char(state, target, costs=Costs()):
                 actions.append(a)
             return actions[::-1], end
         for a, f in MOVES.items():
+            if not costs.allowed(a, s):
+                continue
             ns = f(s)
             nd = d + costs.of(a)
             if nd < dist.get(ns, float("inf")):
@@ -145,15 +157,28 @@ def path_to_char(state, target, costs=Costs()):
                 prev[ns] = (s, a)
                 tie += 1
                 heapq.heappush(heap, (nd, tie, ns))
-    raise ValueError(f"unreachable character {target!r}")
+    return None
+
+
+def path_to_char(state, target, costs=Costs()):
+    """Cheapest action list from state to a cursor on `target`, plus end state."""
+    if target not in CHARSET:
+        raise ValueError(f"character {target!r} is not on the keyboard")
+    found = _search(state, lambda s: char_at(s[0], s[1], s[2]) == target, costs)
+    if found is None:
+        raise ValueError(f"unreachable character {target!r}")
+    return found
 
 
 def plan_name(name, costs=Costs()):
     """Actions that type `name` from a freshly opened box-naming screen and
-    confirm it. Returns a list of action strings: UP/DOWN/LEFT/RIGHT/SELECT/
-    START/A, plus "WAIT_FULL" after an 8th character (auto move to OK)."""
+    confirm it: UP/DOWN/LEFT/RIGHT, PAGE (A on the PAGE button), A, and
+    SELECT/START only with use_meta. "WAIT_FULL" follows an 8th character
+    (the game moves the cursor to OK)."""
     if len(name) > MAX_CHARS:
         raise ValueError(f"{name!r} is longer than {MAX_CHARS} characters")
+    if not name.strip(" "):
+        raise ValueError("an empty or all-space name is not saved by the game")
     state = INITIAL
     out = []
     for ch in name:
@@ -161,9 +186,10 @@ def plan_name(name, costs=Costs()):
         out.extend(actions)
         out.append("A")
     if len(name) == MAX_CHARS:
-        out += ["WAIT_FULL", "A"]  # cursor is moved to OK by the game
+        out += ["WAIT_FULL", "A"]
     else:
-        out += ["START", "A"]
+        actions, state = _search(state, lambda s: on_button(s, 2), costs)
+        out += actions + ["A"]
     return out
 
 
@@ -180,6 +206,8 @@ def simulate(actions):
             state = start(state)
         elif a == "A":
             page, x, y, _ = state
+            if on_button(state, 0):
+                raise AssertionError("bare A on PAGE; plan it as PAGE")
             if x == COLS[page]:
                 if y == 2:
                     return "".join(buf)

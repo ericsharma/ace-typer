@@ -30,7 +30,7 @@ NEUTRAL = {
 # Game action -> Switch button (GBA SELECT = Minus, START = Plus).
 BUTTON = {
     "UP": "DPAD_UP", "DOWN": "DPAD_DOWN", "LEFT": "DPAD_LEFT", "RIGHT": "DPAD_RIGHT",
-    "A": "A", "B": "B", "SELECT": "MINUS", "START": "PLUS",
+    "A": "A", "B": "B", "PAGE": "A", "SELECT": "MINUS", "START": "PLUS",
 }
 
 
@@ -61,7 +61,7 @@ def box_steps(name, t: Timings, next_box=True):
         last = i == len(actions) - 1
         if last:
             steps.append((None, t.confirm_return))
-        elif a == "SELECT":
+        elif a in ("PAGE", "SELECT"):
             steps.append((None, t.page_swap))
         else:
             steps.append((None, t.gap))

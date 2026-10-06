@@ -202,3 +202,22 @@ def test_gist_hexwriter_six_codes():
     assert all(c.kind == "chars" for c in codes)
     assert codes[5].boxes[10].name == "LRnyFRn "
     assert codes[0].boxes[11].name == "  ♀Fwq  "
+
+
+# ── CodeGenerator raw-data verification ─────────────────────────────────────
+
+def test_codegenerator_raw_data_verifies_every_box():
+    (code,) = parse((FIX / "codegenerator_first_ace.txt").read_text())
+    assert len(code.raw) == 99
+    assert code.boxes[4].name == "A0O?n"      # zero, then capital O
+    assert code.boxes[9].name == "-R!s"       # en dash typed as hyphen 0xAE
+    assert any("byte for byte" in w for w in code.warnings)
+    _check_typeable([code])
+
+
+def test_codegenerator_raw_data_mismatch_is_refused():
+    text = (FIX / "codegenerator_first_ace.txt").read_text()
+    # Box 4 as letter O instead of zero: raw data must catch it.
+    bad = text.replace("Box  4: A 0 O ? n         [A0O?n]", "Box  4: A O O ? n         [AOO?n]")
+    with pytest.raises(ParseError, match="Box 4"):
+        parse(bad)

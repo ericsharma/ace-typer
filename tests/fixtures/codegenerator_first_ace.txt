@@ -1,0 +1,52 @@
+0xE2CFACBA   ;   / ? U n   SBC r10, r15, #0xba00
+0xE2A4BFC0   ;   F E 3 n   ADC r11, r4, #0x300
+0xE5AAB1D5   ;   a “ 9 q   STR r11, [r10, #0x1d5]!
+0xE3ADC8D8   ;   d N . o   MOV r12, #0xd80000
+0xE2ACC9A1   ;   0 O ? n   ADC r12, r12, #0x284000
+0xE2ACCDEC   ;   x S ? n   ADC r12, r12, #0x3b00
+0xE5ABC000   ;   _ F ! q   STR r12, [r11, #0]!
+0xE3ADCBA9   ;   8 Q . o   MOV r12, #0x2a400
+0xE2CCCCA3   ;   2 R R n   SBC r12, r12, #0xa300
+0xE2CCC0A5   ;   4 F R n   SBC r12, r12, #0xa5
+0xE7ABCCAE   ;   – R ! s   0xE7ABCCAE
+
+Box  1: / ? U n F E 3 n   [/?UnFE3n]
+Box  2: A A A a “ 9 q     [AAAa“9q]
+Box  3: A A d N . o       [AAdN.o]
+Box  4: A 0 O ? n         [A0O?n]
+Box  5: x S ? n _ F ! q   [xS?n F!q]
+Box  6: A A A 8 Q . o     [AAA8Q.o]
+Box  7: A A 2 R R n       [AA2RRn]
+Box  8: A 4 F R n         [A4FRn]
+Box  9: – R ! s           [–R!s]
+Box 10: A A A _ _ . o a   [AAA  .oa]
+Box 11: . o               [.o]
+
+All commands (with exit code and fillers):
+SBC r10, r15, #0xba00
+ADC r11, r4, #0x300
+0xBBBBBBFF            ; (filler)
+STR r11, [r10, #0x1d5]!
+0xBBBBFFFF            ; (filler)
+MOV r12, #0xd80000
+0xBBFFFFFF            ; (filler)
+ADC r12, r12, #0x284000
+0xFFFFFFFF            ; (filler)
+ADC r12, r12, #0x3b00
+STR r12, [r11, #0]!
+0xBBBBBBFF            ; (filler)
+MOV r12, #0x2a400
+0xBBBBFFFF            ; (filler)
+SBC r12, r12, #0xa300
+0xBBFFFFFF            ; (filler)
+SBC r12, r12, #0xa5
+0xFFFFFFFF            ; (filler)
+0xE7ABCCAE
+; ======== EXIT CODE ========
+0x00000000            ; (filler)
+0xBBBBBBFF            ; (filler)
+MOV r0, #0
+MOV r15, #0x354
+
+Raw data (in hexadecimal):
+BA AC CF E2 C0 BF A4 E2 FF BB BB BB D5 B1 AA E5 FF FF BB BB D8 C8 AD E3 FF FF FF BB A1 C9 AC E2 FF FF FF FF EC CD AC E2 00 C0 AB E5 FF BB BB BB A9 CB AD E3 FF FF BB BB A3 CC CC E2 FF FF FF BB A5 C0 CC E2 FF FF FF FF AE CC AB E7 FF FF FF FF FF BB BB BB 00 00 AD E3 D5 FF AD E3 FF FF FF FF FF FF FF 

@@ -22,7 +22,7 @@ warning, and anything that cannot be typed exactly is an error.
 import re
 from dataclasses import dataclass, field
 
-from .keyboard import CHARSET, MAX_CHARS
+from .keyboard import BOX_NAME_BYTES, CHARSET, MAX_CHARS, encode_box_name
 
 BOX_COUNT = 14
 PLACEHOLDER_CHARS = "*&%$"
@@ -52,6 +52,8 @@ SLEIPNIR = [
 
 BOX_LINE = re.compile(
     r"^\s*box(?:es)?\s*(\d{1,2})(?:\s*(?:-|–|to)\s*(\d{1,2}))?\s*:?(.*)$", re.I)
+RAW_HEADER = re.compile(r"^\s*raw data\b", re.I)
+HEX_PAIRS = re.compile(r"^\s*(?:[0-9A-Fa-f]{2}\s+)*[0-9A-Fa-f]{2}\s*$")
 CODE_HEADER = re.compile(r"^\s*#*\s*code\s*(\d+)\b", re.I)
 LEAVE = re.compile(r"^\s*\(?\s*leave\s+(?:it\s+)?as\s+is\s*\)?\s*$", re.I)
 BRACKET = re.compile(r"^(.*?)\s*\[(.*)\]\s*(\(.*\))?\s*$")
@@ -80,6 +82,7 @@ class Code:
     kind: str                   # "chars" or "hex"
     boxes: dict[int, Box] = field(default_factory=dict)
     warnings: list[str] = field(default_factory=list)
+    raw: bytes | None = None    # CodeGenerator "Raw data", boxes from Box 1
 
     def needs_params(self):
         return [b for b in self.boxes.values() if b.placeholders]
@@ -194,9 +197,21 @@ def parse(text, switch=True):
         current = Code(title=title, kind="")
         codes.append(current)
 
+    raw_target = None   # code that the following "Raw data" lines belong to
     for line_no, raw in enumerate(text.splitlines(), 1):
         # Markdown wrappers: inline code, quotes, list bullets.
         line = raw.strip().strip("`").lstrip(">-* ").strip()
+        if RAW_HEADER.match(line):
+            if current is None:
+                raise ParseError(f"line {line_no}: raw data before any box line")
+            raw_target = current
+            raw_target.raw = b""
+            continue
+        if raw_target is not None:
+            if HEX_PAIRS.match(line):
+                raw_target.raw += bytes.fromhex(line)
+                continue
+            raw_target = None
         h = CODE_HEADER.match(line)
         if h:
             pending_title = f"Code {h.group(1)}"
@@ -254,6 +269,8 @@ def parse(text, switch=True):
     if not codes:
         raise ParseError("no box lines found")
     for c in codes:
+        if c.raw is not None:
+            verify_raw(c)
         listed = set(c.boxes)
         if c.kind == "hex":
             missing = [n for n in range(1, BOX_COUNT + 1) if n not in listed]
@@ -277,3 +294,28 @@ def fill(box: Box, values: dict[str, str]):
     box.name = out
     box.placeholders = ""
     return out
+
+
+def verify_raw(code):
+    """Check every box name against CodeGenerator's raw bytes: box n is
+    bytes 9*(n-1) .. 9*n-1. Raises ParseError on any difference."""
+    raw = code.raw
+    covered = len(raw) // BOX_NAME_BYTES
+    if not covered:
+        raise ParseError("raw data is shorter than one box name")
+    for n in range(1, covered + 1):
+        expected = raw[(n - 1) * BOX_NAME_BYTES:n * BOX_NAME_BYTES]
+        box = code.boxes.get(n)
+        if box is None or box.name is None:
+            if expected != bytes([0xFF]) * BOX_NAME_BYTES:
+                raise ParseError(f"raw data has bytes for Box {n}, but the code does not list Box {n}")
+            continue
+        got = encode_box_name(box.name)
+        if got != expected:
+            raise ParseError(
+                f"Box {n} [{box.name}] encodes to {got.hex(' ').upper()}, "
+                f"raw data says {expected.hex(' ').upper()}")
+    tail = raw[covered * BOX_NAME_BYTES:]
+    code.warnings.append(
+        f"all {covered} box names match CodeGenerator's raw data byte for byte"
+        + (f" ({len(tail)} trailing raw bytes not part of a full box name)" if tail else ""))

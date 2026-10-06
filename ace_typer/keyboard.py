@@ -221,3 +221,23 @@ def simulate(actions):
         else:
             raise AssertionError(f"unknown action {a}")
     raise AssertionError("name was never confirmed")
+
+
+# Game character encoding (pret/pokefirered charmap.txt) for every key.
+ENCODING = {
+    **{c: 0xBB + i for i, c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ")},
+    **{c: 0xD5 + i for i, c in enumerate("abcdefghijklmnopqrstuvwxyz")},
+    **{c: 0xA1 + i for i, c in enumerate("0123456789")},
+    " ": 0x00, "!": 0xAB, "?": 0xAC, ".": 0xAD, "-": 0xAE, "…": 0xB0,
+    "“": 0xB1, "”": 0xB2, "‘": 0xB3, "’": 0xB4, "♂": 0xB5, "♀": 0xB6,
+    ",": 0xB8, "/": 0xBA,
+}
+EOS = 0xFF
+BOX_NAME_BYTES = MAX_CHARS + 1  # boxNames[14][9]
+
+
+def encode_box_name(name):
+    """The 9 bytes the game stores for a box name typed on this screen:
+    the characters, then EOS (0xFF) for every unused byte."""
+    data = [ENCODING[c] for c in name]
+    return bytes(data + [EOS] * (BOX_NAME_BYTES - len(data)))

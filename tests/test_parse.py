@@ -179,11 +179,18 @@ def test_pomeg_block(src, body):
     _check_typeable(codes)
 
 
+GIST = FIX / "local" / "theocatic_gist.md"   # not redistributed (no license)
+needs_gist = pytest.mark.skipif(not GIST.exists(), reason="local-only fixture")
+
+
 def _gist_blocks():
-    parts = (FIX / "theocatic_gist.md").read_text().split("```")
+    if not GIST.exists():
+        return []
+    parts = GIST.read_text().split("```")
     return [p for p in parts[1::2] if re.search(r"(?im)^\W*box\s*\d", p)]
 
 
+@needs_gist
 @pytest.mark.parametrize("body", _gist_blocks())
 def test_gist_block(body):
     try:
@@ -194,8 +201,9 @@ def test_gist_block(body):
     _check_typeable(codes)
 
 
+@needs_gist
 def test_gist_hexwriter_six_codes():
-    gist = (FIX / "theocatic_gist.md").read_text()
+    gist = GIST.read_text()
     block = gist[gist.index("### CODE 1 ###"):gist.index("### CODE 6 ###") + 600]
     codes = parse(block)
     assert [c.title for c in codes] == [f"Code {i}" for i in range(1, 7)]

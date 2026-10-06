@@ -35,6 +35,24 @@ def build_steps(code, timings=Timings(), first=1, last=None):
     return steps
 
 
+def box_and_advance(code, n, timings=Timings()):
+    """Steps that name Box n, then scroll right to the next box that has a
+    name to type. Returns (steps, next box number or None)."""
+    box = code.boxes.get(n)
+    if box is None or box.name is None:
+        raise ValueError(f"Box {n} has no name to type in this code")
+    actions = plan_name(box.name)
+    if simulate(actions) != box.name:
+        raise AssertionError(f"box {n}: planner/simulator disagree for {box.name!r}")
+    later = [m for m, name in code.plan() if m > n and name is not None]
+    if not later:
+        return box_steps(box.name, timings, next_box=False), None
+    steps = box_steps(box.name, timings, next_box=True)
+    for _ in range(later[0] - n - 1):
+        steps += [("RIGHT", timings.press), (None, timings.scroll)]
+    return steps, later[0]
+
+
 def preview(code):
     lines = [f"{code.title} ({code.kind})"]
     for n in range(1, max(code.boxes) + 1):
@@ -60,6 +78,9 @@ def main():
     ap.add_argument("--from", dest="first", type=int, default=1,
                     help="start at this box (cursor on its title)")
     ap.add_argument("--to", dest="last", type=int, default=None, help="stop after this box")
+    ap.add_argument("--box", type=int, default=None,
+                    help="type only this box, then move to the next box that has a name "
+                         "(cursor must start on this box's title)")
     args = ap.parse_args()
 
     text = sys.stdin.read() if args.file == "-" else open(args.file, encoding="utf-8").read()
@@ -73,8 +94,13 @@ def main():
     if code.needs_params():
         sys.exit("placeholders are not filled: " +
                  ", ".join(f"Box {b.number} {b.placeholders}" for b in code.needs_params()))
-    steps = build_steps(code, first=args.first, last=args.last)
-    print(f"boxes {args.first}..{args.last or max(code.boxes)}; start with the cursor on Box {args.first}'s title")
+    if args.box is not None:
+        steps, next_box = box_and_advance(code, args.box)
+        print(f"Box {args.box}: [{code.boxes[args.box].name}]; start with the cursor on Box {args.box}'s title")
+        print(f"ends on Box {next_box}'s title" if next_box else "last box of the code; ends on this box's title")
+    else:
+        steps = build_steps(code, first=args.first, last=args.last)
+        print(f"boxes {args.first}..{args.last or max(code.boxes)}; start with the cursor on Box {args.first}'s title")
     print(f"{len(steps)} steps, {sum(s for _, s in steps):.0f}s")
     if args.dry:
         return

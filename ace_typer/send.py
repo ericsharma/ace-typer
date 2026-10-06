@@ -38,8 +38,8 @@ BUTTON = {
 
 @dataclass
 class Timings:
-    press: float = 0.10        # button held
-    gap: float = 0.10          # release after a button
+    press: float = 0.25        # button held (0.10 lost presses on long runs)
+    gap: float = 0.25          # release after a button
     menu_open: float = 1.5     # box title A -> JUMP/WALLPAPER/NAME/CANCEL menu
     naming_open: float = 2.5   # NAME -> naming screen faded in
     page_swap: float = 1.0     # SELECT -> next page usable

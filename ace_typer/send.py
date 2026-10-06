@@ -40,12 +40,12 @@ BUTTON = {
 class Timings:
     press: float = 0.10        # button held
     gap: float = 0.10          # release after a button
-    menu_open: float = 1.0     # box title A -> JUMP/WALLPAPER/NAME/CANCEL menu
-    naming_open: float = 2.0   # NAME -> naming screen faded in
+    menu_open: float = 1.5     # box title A -> JUMP/WALLPAPER/NAME/CANCEL menu
+    naming_open: float = 2.5   # NAME -> naming screen faded in
     page_swap: float = 1.0     # SELECT -> next page usable
     full_to_ok: float = 1.0    # 8th character -> cursor moved to OK
-    confirm_return: float = 2.5  # OK -> back on the PC box screen
-    scroll: float = 1.5        # RIGHT on box title -> next box shown
+    confirm_return: float = 3.5  # OK -> back on the PC box screen
+    scroll: float = 2.5        # RIGHT on box title -> next box shown
 
 
 def box_steps(name, t: Timings, next_box=True):

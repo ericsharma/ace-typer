@@ -15,19 +15,23 @@ from .parse import ParseError, parse
 from .send import Controller, Timings, box_steps
 
 
-def build_steps(code, timings=Timings()):
-    plan = code.plan()
+def build_steps(code, timings=Timings(), first=1, last=None):
+    """Steps for boxes first..last; the cursor must start on Box `first`'s title."""
+    plan = [(n, name) for n, name in code.plan()
+            if n >= first and (last is None or n <= last)]
+    if not plan:
+        raise ValueError(f"no boxes in range {first}..{last}")
     steps = []
     for i, (n, name) in enumerate(plan):
-        last = i == len(plan) - 1
+        is_last = i == len(plan) - 1
         if name is None:
-            if not last:
+            if not is_last:
                 steps += [("RIGHT", timings.press), (None, timings.scroll)]
             continue
         actions = plan_name(name)
         if simulate(actions) != name:
             raise AssertionError(f"box {n}: planner/simulator disagree for {name!r}")
-        steps += box_steps(name, timings, next_box=not last)
+        steps += box_steps(name, timings, next_box=not is_last)
     return steps
 
 
@@ -53,6 +57,9 @@ def main():
     ap.add_argument("--code", type=int, default=1, help="which code to type (1-based)")
     ap.add_argument("--no-switch", action="store_true", help="ignore '(use X for Switch)'")
     ap.add_argument("--dry", action="store_true", help="preview only")
+    ap.add_argument("--from", dest="first", type=int, default=1,
+                    help="start at this box (cursor on its title)")
+    ap.add_argument("--to", dest="last", type=int, default=None, help="stop after this box")
     args = ap.parse_args()
 
     text = sys.stdin.read() if args.file == "-" else open(args.file, encoding="utf-8").read()
@@ -66,7 +73,8 @@ def main():
     if code.needs_params():
         sys.exit("placeholders are not filled: " +
                  ", ".join(f"Box {b.number} {b.placeholders}" for b in code.needs_params()))
-    steps = build_steps(code)
+    steps = build_steps(code, first=args.first, last=args.last)
+    print(f"boxes {args.first}..{args.last or max(code.boxes)}; start with the cursor on Box {args.first}'s title")
     print(f"{len(steps)} steps, {sum(s for _, s in steps):.0f}s")
     if args.dry:
         return

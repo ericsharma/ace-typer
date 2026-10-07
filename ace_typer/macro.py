@@ -16,9 +16,11 @@ BUTTON = {
 class Timings:
     # Hold well under the naming screen's key-repeat delay (16 frames =
     # 267 ms, naming_screen.c): 250 ms plus Bluetooth jitter repeated D-pad
-    # presses. The 250 ms gap keeps presses from merging (0.10/0.10 lost some).
+    # presses. The gap keeps presses from merging (0.10/0.10 lost some;
+    # 0.15/0.25 still lost some, so the gap was raised to make each
+    # press+gap cycle 30% longer: 400 ms -> 520 ms).
     press: float = 0.15        # button held
-    gap: float = 0.25          # release after a button
+    gap: float = 0.37          # release after a button
     menu_open: float = 1.5     # box title A -> JUMP/WALLPAPER/NAME/CANCEL menu
     naming_open: float = 2.5   # NAME -> naming screen faded in
     page_swap: float = 1.0     # PAGE -> next page usable

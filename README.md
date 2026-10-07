@@ -55,7 +55,7 @@ See [`examples/`](examples/).
   [pret/pokefirered](https://github.com/pret/pokefirered) `naming_screen.c`),
   plans the shortest D-pad + A path for each name, and replays it to check it.
 - `macro.py` turns the plan into one nxbt macro. nxbt times every press:
-  150 ms hold (key repeat starts at 267 ms) and 250 ms between presses.
+  150 ms hold (key repeat starts at 267 ms) and 370 ms between presses.
 - `web.py` is what the nxbt web page calls; `send.py` is the command-line client.
 
 The nxbt web app needs a small patch for this (the `macro_async`,

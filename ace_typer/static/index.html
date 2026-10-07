@@ -104,6 +104,8 @@
         <button id="check-btn" onclick="checkBoard()">Check</button></div>
       <div class="pill"><span class="dot" id="pa-dot"></span><span id="pa-text">Pokémon Automation</span>
         <button id="pa-btn" onclick="togglePA()">…</button></div>
+      <div class="pill" title="Moonlight's keyboard drives the Switch. The Switch app turns this on and off by itself."><span class="dot" id="keys-dot"></span><span id="keys-text">Keys off</span>
+        <button id="keys-btn" onclick="toggleKeys()">On</button></div>
     </div>
   </header>
 
@@ -254,6 +256,12 @@ async function togglePA() {
   poll();
 }
 
+async function toggleKeys() {
+  const on = !(S.state && S.state.live && S.state.live.on);
+  await api("/api/live", { on });
+  poll();
+}
+
 function paintRows() {
   const run = S.state && S.state.run;
   document.querySelectorAll("#boxes tr").forEach(tr => {
@@ -279,6 +287,12 @@ function render(st) {
     $("board-text").textContent = b.ok ? "Board ready · player 1" : "Board: " + b.error;
   }
   $("check-btn").disabled = st.busy || pa === "active";
+  // Live keys
+  const live = st.live || {};
+  $("keys-dot").className = "dot " + (!live.on ? "" : live.error || pa === "active" ? "err" : "ok");
+  $("keys-text").textContent = !live.on ? "Keys off" : pa === "active" ? "Keys: PA has the board" :
+    live.error ? "Keys: " + live.error : "Keys → Switch";
+  $("keys-btn").textContent = live.on ? "Off" : "On";
   // Run
   const run = st.run;
   $("type-btn").disabled = st.busy || pa === "active";

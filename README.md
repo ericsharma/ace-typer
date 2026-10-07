@@ -55,6 +55,27 @@ is for the wired board only and still being tested: check every name.
 **Stop** clears the board's queue and releases all buttons. It has no login:
 anyone who can reach the page can press buttons on the Switch.
 
+## Keyboard control (live keys)
+
+With `--keyboard`, the server reads Sunshine's virtual keyboard ("Keyboard
+passthrough") and drives the board with Pokémon Automation's key map:
+
+| Keys | Switch | Keys | Switch |
+|------|--------|------|--------|
+| Arrows | D-pad | `Q` / `E` | L / R |
+| `Enter` | A | `R` / `\` | ZL / ZR |
+| `Shift`, `Ctrl` | B | `=` / `-` | + / − |
+| `'` | X | `Home`, `Esc`, `H` | HOME |
+| `/` | Y | `Insert` | Capture |
+| `WASD` | left stick | `F1` | hide the overlay |
+
+A key down holds its button; a key up releases it. Every state is held at
+least 50 ms, so a tap from a phone's on-screen keyboard still registers.
+Keys reach the Switch only while live mode is on (`POST /api/live
+{"on": true}`, or **Keys** on the page) and pause while a code is typed.
+With `--mpv-socket`, the legend and a status line are drawn on the Moonlight
+"Switch" app's mpv.
+
 ## Type a code (nxbt)
 
 1. Connect the nxbt controller to the Switch.
@@ -107,7 +128,8 @@ See [`examples/`](examples/).
   at 267 ms) and 370 ms between presses.
 - `wired.py` sends the steps to the board's command queue; `pabb2.py` is the
   PABotBase2 serial protocol (ported from PA's `Common/PABotBase2`).
-- `server.py` and `static/index.html` are the wired web page.
+- `server.py` and `static/index.html` are the wired web page; `keys.py` is
+  live keyboard control and the mpv overlay.
 - `web.py` is what both web pages call; `send.py` is the nxbt
   command-line client.
 

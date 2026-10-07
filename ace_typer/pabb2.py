@@ -64,6 +64,7 @@ MSG_READ_CONTROLLER_MODE = 0x32
 MSG_CONSOLE_DISCONNECT = 0x37
 MSG_CQ_COMMAND_DROPPED = 0x40
 MSG_CQ_CANCEL = 0x41
+MSG_CQ_REPLACE_ON_NEXT = 0x42
 MSG_CQ_COMMAND_FINISHED = 0x43
 MSG_NS1_PLAYER_LIGHTS = 0x94
 MSG_NS1_USB_DISALLOWED = 0x95
@@ -505,6 +506,29 @@ class Board:
                 self._cv.notify_all()
             self.link.send_stream(struct.pack("<HBB", 4, MSG_CQ_CANCEL, 0))
 
+    def clear_queue(self):
+        """Live input: end the current command now (the board goes neutral)
+        without blocking later commands the way cancel_commands() does."""
+        with self._wire:
+            if self.cancelled:
+                raise Cancelled()
+            with self._cv:
+                self.pending_commands.clear()
+                self._cv.notify_all()
+            self.link.send_stream(struct.pack("<HBB", 4, MSG_CQ_CANCEL, 0))
+
+    def replace_with(self, opcode, body):
+        """Live input: queue one command that replaces the running one as soon
+        as it arrives, with no neutral gap in between (a held D-pad stays held
+        while A goes down)."""
+        with self._wire:
+            if self.cancelled:
+                raise Cancelled()
+            with self._cv:
+                self.pending_commands.clear()
+            self.link.send_stream(struct.pack("<HBB", 4, MSG_CQ_REPLACE_ON_NEXT, 0))
+            return self._send_command(opcode, body)
+
     def release(self, opcode, body):
         """Queue one command even after a cancel: the buttons-up at a stop."""
         with self._wire:
@@ -529,7 +553,12 @@ BUTTON_BITS = {
 NEUTRAL_STICKS = bytes((0x00, 0x08, 0x80, 0x00, 0x08, 0x80))  # 12-bit 0x800 each
 
 
-def buttons_body(buttons, milliseconds):
+def stick_bytes(x, y):
+    """12-bit stick position (0x800 = centre; y up is larger) as the 3 report bytes."""
+    return bytes((x & 0xFF, (x >> 8) | ((y & 0x0F) << 4), y >> 4))
+
+
+def buttons_body(buttons, milliseconds, left=(0x800, 0x800)):
     """Body of a PABB2_MESSAGE_CMD_NS1_OEM_CONTROLLER_BUTTONS message."""
     if not 1 <= milliseconds <= 0xFFFF:
         raise ValueError(f"duration {milliseconds} ms is out of range")
@@ -537,7 +566,8 @@ def buttons_body(buttons, milliseconds):
     for name in buttons:
         byte, bit = BUTTON_BITS[name]
         b[byte] |= bit
-    return struct.pack("<H", milliseconds) + bytes(b) + NEUTRAL_STICKS + b"\x00"
+    return (struct.pack("<H", milliseconds) + bytes(b) + stick_bytes(*left)
+            + NEUTRAL_STICKS[3:] + b"\x00")
 
 
 def player_number(lights):

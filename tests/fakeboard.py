@@ -27,6 +27,9 @@ class FakeBoard:
         self.garbage = garbage      # noise bytes before packets to the host
         self.realtime = realtime    # real seconds per command millisecond
         self.cancelled_at = []      # len(commands) at each cancel
+        self.events = []            # ("cmd", report bytes, ms) / ("cancel",) / ("replace",)
+        self._replace = False
+        self._interrupts = 0        # a cancel or a replace ends the running command
         self.session = 0
         self.parser = p.PacketParser()
         self.in_seq = 0
@@ -147,17 +150,26 @@ class FakeBoard:
             self._send_message(p.MSG_RET_U32_DATA, mid,
                                struct.pack("<IBB", self.mode, self.flags, self.lights) + bytes(6))
         elif opcode == p.MSG_NS1_BUTTONS:
-            if len(self._queue) >= self.capacity:
+            if self._replace:
+                self._replace = False
+                self._queue.clear()
+                self._interrupts += 1
+            elif len(self._queue) >= self.capacity:
                 self._send_message(p.MSG_CQ_COMMAND_DROPPED, mid)
                 return
             ms = struct.unpack_from("<H", body)[0]
-            self._queue.append((mid, bytes(body[2:5]), ms))
+            self._queue.append((mid, bytes(body[2:5]), ms, bytes(body[2:11])))
             self._work.notify_all()
         elif opcode == p.MSG_CQ_CANCEL:
             self._queue.clear()
             self.cancels += 1
+            self._interrupts += 1
             self.cancelled_at.append(len(self.commands))
+            self.events.append(("cancel",))
             self._work.notify_all()
+        elif opcode == p.MSG_CQ_REPLACE_ON_NEXT:
+            self._replace = True
+            self.events.append(("replace",))
 
     def _executor(self):
         while not self._stop:
@@ -165,13 +177,14 @@ class FakeBoard:
                 self._work.wait_for(lambda: self._queue or self._stop, timeout=0.1)
                 if not self._queue:
                     continue
-                mid, buttons, ms = self._queue.pop(0)
+                mid, buttons, ms, report = self._queue.pop(0)
                 self.commands.append((buttons, ms))
-                # Hold for the command's time; a cancel ends it at once.
-                cancels = self.cancels
-                self._work.wait_for(lambda: self.cancels != cancels or self._stop,
+                self.events.append(("cmd", report, ms))
+                # Hold for the command's time; a cancel or replace ends it at once.
+                interrupts = self._interrupts
+                self._work.wait_for(lambda: self._interrupts != interrupts or self._stop,
                                     timeout=max(0.0005, ms * self.realtime))
-                if self.cancels != cancels:
+                if self._interrupts != interrupts:
                     continue
                 self.clock_us += ms * 1000
                 self._send_message(p.MSG_CQ_COMMAND_FINISHED, mid,

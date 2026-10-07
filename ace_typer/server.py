@@ -1,16 +1,23 @@
-"""Web page for typing box codes with the wired board.
+"""Web page for typing box codes with the wired board, and live keyboard
+control for the Moonlight "Switch" app.
 
   ./run ace_typer.server [--host 127.0.0.1] [--port 8171] [--board /dev/pa-esp32s3]
+                         [--keyboard] [--mpv-socket PATH]
 
 One page plus a small JSON API. Runs on the computer the board's COM port is
-plugged into. The board is opened for each run (and for a check) and closed
-afterwards, so Pokémon Automation can use it between runs. One run at a time.
+plugged into. One board connection serves typing runs, checks and live keys;
+it closes after 10 s unused, so Pokémon Automation can have the board.
+
+--keyboard reads Sunshine's virtual keyboard; keys reach the Switch only
+while live mode is on (POST /api/live). --mpv-socket draws the key legend and
+status on the Switch app's mpv.
 
 No authentication: anyone who can reach the page can type on the Switch.
 POSTs must be JSON, so another web page cannot send them from a browser.
 """
 
 import argparse
+import contextlib
 import json
 import signal
 import subprocess
@@ -20,23 +27,97 @@ import traceback
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from importlib import resources
 
-from . import web
+from . import keys, web
 from .wired import DEFAULT_PORT, LEAD_IN_MS, PA_UNIT, Stopped, WiredController
+
+IDLE_CLOSE_S = 10
+
+
+class BoardOwner:
+    """The one board connection. Opened on first use; closed after `idle`
+    seconds unused and never while a run holds it."""
+
+    def __init__(self, factory, idle=IDLE_CLOSE_S, keep_open=lambda: False):
+        self.factory = factory
+        self.idle = idle
+        self.keep_open = keep_open
+        self._lock = threading.RLock()
+        self._controller = None
+        self._holds = 0
+        self._last = 0.0
+        threading.Thread(target=self._closer, daemon=True).start()
+
+    def acquire(self):
+        with self._lock:
+            c = self._controller
+            if c is not None and c.link.error:
+                self._drop()
+            if self._controller is None:
+                self._controller = self.factory()
+            self._last = time.monotonic()
+            return self._controller
+
+    @contextlib.contextmanager
+    def hold(self):
+        with self._lock:
+            c = self.acquire()
+            self._holds += 1
+        try:
+            yield c
+        finally:
+            with self._lock:
+                self._holds -= 1
+                self._last = time.monotonic()
+
+    def is_open(self):
+        return self._controller is not None
+
+    def close(self):
+        """Close unless a run holds it. True when closed (or already closed)."""
+        with self._lock:
+            if self._holds:
+                return False
+            self._drop()
+            return True
+
+    def discard(self):
+        """After a stopped run: that connection's queue stays cancelled."""
+        with self._lock:
+            self._drop()
+
+    def _drop(self):
+        c, self._controller = self._controller, None
+        if c is not None:
+            c.close()
+
+    def _closer(self):
+        while True:
+            time.sleep(1)
+            with self._lock:
+                if (self._controller is not None and not self._holds
+                        and not self.keep_open()
+                        and time.monotonic() - self._last > self.idle):
+                    self._drop()
 
 
 class Typer:
-    """Board checks, Pokémon Automation start/stop, and one run at a time."""
+    """Board checks, Pokémon Automation start/stop, one run at a time, and
+    live keys."""
 
     def __init__(self, board_port=DEFAULT_PORT, systemctl="systemctl", controller_factory=None):
         self.systemctl = systemctl
-        self.factory = controller_factory or (lambda: WiredController(board_port, log=self.log))
+        self.logs = []
+        self.owner = BoardOwner(
+            controller_factory or (lambda: WiredController(board_port, log=self.log)),
+            keep_open=lambda: self.live.on and self.pa_state() != "active")
+        self.live = keys.Live(self.owner, busy=self.busy, log=self.log)
         self._lock = threading.Lock()
         self._thread = None
         self._controller = None
         self._stop_requested = False
+        self._pa_cache = (0.0, "unknown")
         self.run = None      # the current or last run, as shown on the page
         self.board = None    # the last board check
-        self.logs = []
 
     def log(self, message):
         self.logs.append(f"{time.strftime('%H:%M:%S')}  {message}")
@@ -47,19 +128,27 @@ class Typer:
 
     # -- Pokémon Automation
 
-    def pa_state(self):
+    def pa_state(self, max_age=2.0):
+        at, state = self._pa_cache
+        if time.monotonic() - at < max_age:
+            return state
         try:
             out = subprocess.run([self.systemctl, "--user", "is-active", PA_UNIT],
                                  capture_output=True, text=True, timeout=5)
+            state = out.stdout.strip() or "unknown"
         except (OSError, subprocess.TimeoutExpired):
-            return "unknown"
-        return out.stdout.strip() or "unknown"
+            state = "unknown"
+        self._pa_cache = (time.monotonic(), state)
+        return state
 
     def pa(self, action):
         if action not in ("start", "stop"):
             return {"ok": False, "error": f"unknown action {action!r}"}
-        if action == "start" and self.busy():
-            return {"ok": False, "error": "typing: stop or wait before starting Pokémon Automation"}
+        if action == "start":
+            if self.busy():
+                return {"ok": False, "error": "typing: stop or wait before starting Pokémon Automation"}
+            self.live.release()
+            self.owner.close()     # PA must find the serial port free
         self.log(f"{action} Pokémon Automation")
         try:
             out = subprocess.run([self.systemctl, "--user", action, PA_UNIT],
@@ -68,28 +157,67 @@ class Typer:
             return {"ok": False, "error": str(e)}
         if out.returncode != 0:
             return {"ok": False, "error": out.stderr.strip() or f"systemctl {action} failed"}
-        return {"ok": True, "pa": self.pa_state()}
+        return {"ok": True, "pa": self.pa_state(max_age=0)}
+
+    # -- live keys
+
+    def set_live(self, on):
+        self.live.set(bool(on))
+        if on:
+            # Connect now, so the first key press does not wait for it.
+            threading.Thread(target=self._warm, daemon=True).start()
+        else:
+            self.owner.close()     # free the port for PA ("Automation" may be next)
+        self.log("live keys " + ("on" if on else "off"))
+        return {"ok": True, "live": bool(on)}
+
+    def _warm(self):
+        if self.busy() or self.pa_state(max_age=0) == "active":
+            return
+        try:
+            self.owner.acquire()
+            self.live.error = None
+        except Exception as e:
+            self.live.error = str(e)
+            self.log(f"keys: {e}")
+
+    def _close_unless_live(self):
+        if not self.live.on:
+            self.owner.close()
+
+    def overlay_status(self):
+        """(status text, ok, show legend) for the Switch app's overlay."""
+        if not self.live.on:
+            return "", True, False
+        legend = self.live.show_legend
+        if self.busy():
+            box = (self.run or {}).get("box")
+            return f"Typing Box {box} — keys paused", True, legend
+        if self.pa_state() == "active":
+            return "Pokémon Automation has the board — keys off", False, legend
+        if self.live.error:
+            return f"Keys off: {self.live.error}"[:90], False, legend
+        return "Keyboard → Switch", True, legend
 
     # -- board
 
     def check(self):
-        """Connect, read the board and the Switch link, disconnect. No input."""
+        """Read the board and the Switch link. No input."""
         if self.busy():
             return {"ok": False, "error": "typing: the board is in use"}
         try:
-            c = self.factory()
-        except Exception as e:
-            self.board = {"ok": False, "error": str(e), "time": time.time()}
-            return self.board
-        try:
+            c = self.owner.acquire()
             info = dict(c.info)
+            info.update(c.read_status())
             try:
                 c.check_ready()
                 info["ok"] = True
             except RuntimeError as e:
                 info.update(ok=False, error=str(e))
-        finally:
-            c.close()
+        except Exception as e:
+            self.owner.discard()
+            info = {"ok": False, "error": str(e)}
+        self._close_unless_live()
         info["time"] = time.time()
         self.board = info
         self.log("board: " + ("ready, player 1" if info["ok"] else info["error"]))
@@ -109,7 +237,7 @@ class Typer:
                             fast=bool(req.get("fast")))
             if not plan["ok"]:
                 return plan
-            if self.pa_state() == "active":
+            if self.pa_state(max_age=0) == "active":
                 return {"ok": False, "error": "Pokémon Automation is running and holds "
                                               "the board. Stop it first."}
             segments = plan.pop("segments")
@@ -132,22 +260,20 @@ class Typer:
         return {"ok": True, **plan}
 
     def _run(self, run, steps):
+        self.live.release()        # no key may stay held into the run
+        clean = False
         try:
-            c = self.factory()
-        except Exception as e:
-            run.update(state="error", error=str(e))
-            self.log(f"error: {e}")
-            return
-        self._controller = c
-        try:
-            if self._stop_requested:
-                raise Stopped()
-            run["state"] = "typing"
-            report = c.run(steps, log=self.log)
-            run["report"] = {"ok": report["ok"], "text": report["text"],
-                             "worst_press_ms": report["worst_press_ms"]}
-            run["state"] = "done" if report["ok"] else "timing"
-            run["done_ms"] = run["total_ms"]
+            with self.owner.hold() as c:
+                self._controller = c
+                if self._stop_requested:
+                    raise Stopped()
+                run["state"] = "typing"
+                report = c.run(steps, log=self.log)
+                run["report"] = {"ok": report["ok"], "text": report["text"],
+                                 "worst_press_ms": report["worst_press_ms"]}
+                run["state"] = "done" if report["ok"] else "timing"
+                run["done_ms"] = run["total_ms"]
+                clean = True
         except Stopped:
             run["state"] = "stopped"
             self.log("stopped; all buttons released")
@@ -157,7 +283,10 @@ class Typer:
             self.log(traceback.format_exc().strip().splitlines()[-1])
         finally:
             self._controller = None
-            c.close()
+            if clean:
+                self._close_unless_live()
+            else:
+                self.owner.discard()
             run["finished"] = time.time()
 
     def stop(self):
@@ -180,8 +309,11 @@ class Typer:
                 run["done_ms"] = done
                 bounds = self.run["_bounds"]
                 run["box"] = next((n for n, end in bounds if done < end), bounds[-1][0])
+                self.run["box"] = run["box"]
         return {"pa": self.pa_state(), "board": self.board, "run": run,
-                "busy": self.busy(), "log": self.logs[-40:]}
+                "busy": self.busy(), "log": self.logs[-40:],
+                "live": {"on": self.live.on, "error": self.live.error,
+                         "board_open": self.owner.is_open()}}
 
 
 def page():
@@ -225,6 +357,7 @@ def make_handler(typer):
                 "/api/stop": typer.stop,
                 "/api/check": typer.check,
                 "/api/pa": lambda: typer.pa(req.get("action")),
+                "/api/live": lambda: typer.set_live(req.get("on")),
             }
             route = routes.get(self.path)
             if route is None:
@@ -244,8 +377,20 @@ def main():
     ap.add_argument("--port", type=int, default=8171)
     ap.add_argument("--board", default=DEFAULT_PORT, help="board serial port")
     ap.add_argument("--systemctl", default="systemctl")
+    ap.add_argument("--keyboard", action="store_true",
+                    help="read Sunshine's virtual keyboard for live keys")
+    ap.add_argument("--mpv-socket", default=None,
+                    help="JSON IPC socket of the Switch app's mpv, for the overlay")
     args = ap.parse_args()
     typer = Typer(args.board, systemctl=args.systemctl)
+    stop = threading.Event()
+    if args.keyboard:
+        threading.Thread(target=keys.read_keyboard, args=(typer.live.key, typer.log, stop),
+                         daemon=True).start()
+    if args.mpv_socket:
+        threading.Thread(target=keys.overlay_loop,
+                         args=(keys.Overlay(args.mpv_socket), typer.overlay_status, stop),
+                         daemon=True).start()
     server = ThreadingHTTPServer((args.host, args.port), make_handler(typer))
     server.daemon_threads = True
     print(f"ace-typer web on http://{args.host}:{args.port}", flush=True)
@@ -259,7 +404,10 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
+        stop.set()
         typer.stop()
+        typer.live.set(False)
+        typer.owner.discard()
 
 
 if __name__ == "__main__":

@@ -229,3 +229,29 @@ def test_codegenerator_raw_data_mismatch_is_refused():
     bad = text.replace("Box  4: A 0 O ? n         [A0O?n]", "Box  4: A O O ? n         [AOO?n]")
     with pytest.raises(ParseError, match="Box 4"):
         parse(bad)
+
+
+# ── Switch FAQ checks (warnings only) ───────────────────────────────────────
+
+def test_switch_warns_trailing_spaces_in_box_4_8_12():
+    (code,) = parse("Box 4: E _ F R m _ _ _ [E FRm   ]\nBox 5: E _ F R m _ _ _ [E FRm   ]")
+    assert code.boxes[4].name == "E FRm   "          # never changed
+    assert any("last three characters" in w for w in code.boxes[4].warnings)
+    assert not any("last three" in w for w in code.boxes[5].warnings)
+
+
+def test_switch_warns_old_exit_codes():
+    (code,) = parse("Box 10: _ F o H I C o r [ FoHICor]\nBox 11: B n [Bn]")
+    assert any("Box 10 [ FoHIoor], Box 11 [xn]" in w for w in code.boxes[10].warnings)
+    (code,) = parse("Box 11: … o _ _ _ _ _ _ […o      ]")
+    assert any("[.o]" in w for w in code.boxes[11].warnings)
+
+
+def test_no_switch_checks_when_switch_is_off():
+    (code,) = parse("Box 4: E _ F R m _ _ _ [E FRm   ]", switch=False)
+    assert not code.boxes[4].warnings
+
+
+def test_codegenerator_switch_output_has_no_switch_warnings():
+    (code,) = parse((FIX / "codegenerator_first_ace.txt").read_text())
+    assert not any("pomeg FR/LG FAQ" in w for b in code.boxes.values() for w in b.warnings)

@@ -271,6 +271,8 @@ def parse(text, switch=True):
     for c in codes:
         if c.raw is not None:
             verify_raw(c)
+        if switch and c.kind == "chars":
+            switch_checks(c)
         listed = set(c.boxes)
         if c.kind == "hex":
             missing = [n for n in range(1, BOX_COUNT + 1) if n not in listed]
@@ -280,6 +282,34 @@ def parse(text, switch=True):
         if 14 in c.boxes and c.boxes[14].name is not None:
             c.warnings.append("this code renames Box 14, which replaces a Box 14 exit code")
     return codes
+
+
+FAQ = "pomeg FR/LG FAQ, Switch rerelease"
+# Exit codes that crash on the Switch rerelease, with their Switch versions.
+SWITCH_EXITS = [
+    (["…o"], [".o"]),
+    ([" FoHICor", "Bn"], [" FoHIoor", "xn"]),
+]
+
+
+def switch_checks(code):
+    """Warn (never change) where pomeg's FAQ says a code needs a Switch
+    version. CodeGenerator's "Switch" languages already apply these."""
+    for n in (4, 8, 12):
+        box = code.boxes.get(n)
+        if box and box.name and " " in box.name[5:]:
+            box.warnings.append(
+                f"{FAQ}: avoid spaces in the last three characters of Box {n}. "
+                "If they are trailing, the Switch version leaves them empty "
+                "(e.g. [E FRm] instead of [E FRm   ]).")
+    for n, box in code.boxes.items():
+        for old, new in SWITCH_EXITS:
+            names = [code.boxes.get(n + i) for i in range(len(old))]
+            if all(b and b.name and b.name.rstrip(" ") == o
+                   for b, o in zip(names, old)):
+                fix = ", ".join(f"Box {n + i} [{v}]" for i, v in enumerate(new))
+                box.warnings.append(
+                    f"{FAQ}: this exit code crashes on the Switch. Switch version: {fix}.")
 
 
 def fill(box: Box, values: dict[str, str]):

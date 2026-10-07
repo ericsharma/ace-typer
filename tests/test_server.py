@@ -125,3 +125,13 @@ def test_stop_mid_run_queues_no_press_after_the_cancel(site):
 def test_check_reports_player(site):
     info = post(site.base, "/api/check")
     assert info["ok"] and info["player"] == 1 and info["mode"] == 0x1100
+
+
+def test_fast_run_holds_100_ms(site):
+    r = post(site.base, "/api/type", {"text": CODE, "first": 1, "one_box": True, "fast": True})
+    assert r["ok"] and r["fast"] and (r["press_ms"], r["gap_ms"]) == (100, 150)
+    st = wait_idle(site.base)
+    assert st["run"]["state"] == "done", st["run"]
+    (board,) = site.boards
+    presses = [ms for buttons, ms in board.commands if buttons != bytes(3)]
+    assert len(presses) == r["presses"] and set(presses) == {100}

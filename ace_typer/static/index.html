@@ -132,6 +132,10 @@
         <button id="mode-one" class="on" onclick="setMode(true)">One box</button>
         <button id="mode-all" onclick="setMode(false)">All boxes</button>
       </div>
+      <div class="seg" title="Fast holds each press 100 ms with 150 ms between presses (Normal: 150 / 370 ms). Screen-change waits are the same.">
+        <button id="speed-normal" class="on" onclick="setFast(false)">Normal</button>
+        <button id="speed-fast" onclick="setFast(true)">Fast</button>
+      </div>
       <span>from <select id="first" onchange="updateHint()"></select></span>
       <button class="primary" id="type-btn" onclick="typeCode()">Type</button>
       <button class="danger" id="stop-btn" onclick="stopRun()" disabled>Stop</button>
@@ -148,7 +152,7 @@
 </main>
 
 <script>
-const S = { preview: null, oneBox: true, typed: new Set(), lastRun: null, state: null };
+const S = { preview: null, oneBox: true, fast: false, typed: new Set(), lastRun: null, state: null };
 const $ = id => document.getElementById(id);
 const esc = t => { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; };
 const show = t => t.replaceAll(" ", "␣");
@@ -207,10 +211,16 @@ function setMode(one) {
   $("mode-one").classList.toggle("on", one); $("mode-all").classList.toggle("on", !one);
   updateHint();
 }
+function setFast(fast) {
+  S.fast = fast;
+  $("speed-normal").classList.toggle("on", !fast); $("speed-fast").classList.toggle("on", fast);
+  updateHint();
+}
 function updateHint() {
   const b = $("first").value;
   $("hint").textContent = `Before you type: PC → MOVE POKéMON, cursor on the title of Box ${b}, hand empty. ` +
-    (S.oneBox ? `Types Box ${b} only, then moves to the next box to type.` : `Types every box from Box ${b} to the end.`);
+    (S.oneBox ? `Types Box ${b} only, then moves to the next box to type.` : `Types every box from Box ${b} to the end.`) +
+    (S.fast ? " Fast: 100 ms hold, 150 ms gap — still being tested, check every name." : "");
   $("type-btn").textContent = S.oneBox ? `Type Box ${b}` : `Type from Box ${b}`;
 }
 function params() {
@@ -222,11 +232,11 @@ function params() {
 async function typeCode() {
   const r = await api("/api/type", {
     text: $("text").value, code: parseInt($("code").value || 1), first: parseInt($("first").value),
-    one_box: S.oneBox, switch: $("switch").checked, params: params(),
+    one_box: S.oneBox, fast: S.fast, switch: $("switch").checked, params: params(),
   });
   if (!r.ok) return msg("run-msg", r.error, "err");
   S.lastRun = r;
-  msg("run-msg", `Typing Box${r.start_box === r.end_box ? " " + r.start_box : "es " + r.start_box + "–" + r.end_box} · ${r.presses} presses. Do not touch the Switch.`, "run");
+  msg("run-msg", `Typing Box${r.start_box === r.end_box ? " " + r.start_box : "es " + r.start_box + "–" + r.end_box} · ${r.presses} presses · ${r.press_ms}/${r.gap_ms} ms${r.fast ? " (fast)" : ""}. Do not touch the Switch.`, "run");
   poll();
 }
 async function stopRun() { await api("/api/stop"); poll(); }

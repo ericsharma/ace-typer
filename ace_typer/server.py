@@ -105,7 +105,8 @@ class Typer:
             plan = web.plan(req.get("text", ""), code=int(req.get("code") or 1),
                             first=int(first) if first else None,
                             one_box=bool(req.get("one_box")),
-                            switch=bool(req.get("switch", True)), params=req.get("params"))
+                            switch=bool(req.get("switch", True)), params=req.get("params"),
+                            fast=bool(req.get("fast")))
             if not plan["ok"]:
                 return plan
             if self.pa_state() == "active":
@@ -125,7 +126,9 @@ class Typer:
             self._thread = threading.Thread(target=self._run, args=(self.run, steps), daemon=True)
             self._thread.start()
         self.log(f"typing Boxes {plan['start_box']}-{plan['end_box']}: "
-                 f"{plan['presses']} presses, {plan['seconds']}s")
+                 f"{plan['presses']} presses, {plan['seconds']}s, "
+                 f"{plan['press_ms']} ms hold / {plan['gap_ms']} ms gap"
+                 + (" (fast)" if plan["fast"] else ""))
         return {"ok": True, **plan}
 
     def _run(self, run, steps):

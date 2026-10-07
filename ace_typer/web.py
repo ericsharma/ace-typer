@@ -8,7 +8,7 @@ Both return plain dicts and never raise for bad input: errors come back as
 {"ok": False, "error": "..."} so the page can show them.
 """
 
-from .macro import Timings, box_and_advance, box_segments, build_steps, steps_to_macro
+from .macro import FAST, Timings, box_and_advance, box_segments, build_steps, steps_to_macro
 from .parse import BOX_COUNT, ParseError, fill, parse
 
 
@@ -92,16 +92,17 @@ def compile(text, code=1, first=None, switch=True, params=None):
     }
 
 
-def plan(text, code=1, first=None, one_box=False, switch=True, params=None):
+def plan(text, code=1, first=None, one_box=False, switch=True, params=None, fast=False):
     """Steps for the wired page, split per box: {"segments": [(box, steps)]}.
     one_box types only Box `first`, then scrolls to the next box with a name
-    ("next_box"), so the user can check each box before the next."""
+    ("next_box"), so the user can check each box before the next. fast uses
+    macro.FAST (100 ms hold, 150 ms gap) instead of the defaults."""
     try:
         c, typed = _select(text, code, switch, params)
         start = first or typed[0]
         if not 1 <= start <= BOX_COUNT:
             raise ValueError(f"start box {start} is outside 1-{BOX_COUNT}")
-        timings = Timings()
+        timings = FAST if fast else Timings()
         if one_box:
             steps, next_box = box_and_advance(c, start, timings)
             segments = [(start, steps)]
@@ -121,5 +122,8 @@ def plan(text, code=1, first=None, one_box=False, switch=True, params=None):
         "start_box": start,
         "end_box": end,
         "next_box": next_box,
+        "fast": bool(fast),
+        "press_ms": round(timings.press * 1000),
+        "gap_ms": round(timings.gap * 1000),
         "names": {str(n): c.boxes[n].name for n in typed if start <= n <= end},
     }

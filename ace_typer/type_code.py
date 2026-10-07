@@ -15,7 +15,7 @@ boxes are skipped with one RIGHT tap. The run ends on the last box's title.
 import argparse
 import sys
 
-from .macro import box_and_advance, build_steps, preview
+from .macro import FAST, Timings, box_and_advance, build_steps, preview
 from .parse import ParseError, parse
 
 
@@ -31,6 +31,8 @@ def main():
     ap.add_argument("--controller", choices=("wired", "nxbt"), default="wired",
                     help="wired = ESP32-S3 board on --port (default); nxbt = nxbt web app")
     ap.add_argument("--port", default=None, help="wired board serial port (default /dev/pa-esp32s3)")
+    ap.add_argument("--fast", action="store_true",
+                    help="100 ms hold / 150 ms gap instead of 150/370 (wired board only)")
     ap.add_argument("--box", type=int, default=None,
                     help="type only this box, then move to the next box that has a name "
                          "(cursor must start on this box's title)")
@@ -47,12 +49,15 @@ def main():
     if code.needs_params():
         sys.exit("placeholders are not filled: " +
                  ", ".join(f"Box {b.number} {b.placeholders}" for b in code.needs_params()))
+    if args.fast and args.controller != "wired":
+        sys.exit("--fast needs the wired board: nxbt's Bluetooth timing is not exact enough")
+    timings = FAST if args.fast else Timings()
     if args.box is not None:
-        steps, next_box = box_and_advance(code, args.box)
+        steps, next_box = box_and_advance(code, args.box, timings)
         print(f"Box {args.box}: [{code.boxes[args.box].name}]; start with the cursor on Box {args.box}'s title")
         print(f"ends on Box {next_box}'s title" if next_box else "last box of the code; ends on this box's title")
     else:
-        steps = build_steps(code, first=args.first, last=args.last)
+        steps = build_steps(code, timings, first=args.first, last=args.last)
         print(f"boxes {args.first}..{args.last or max(code.boxes)}; start with the cursor on Box {args.first}'s title")
     print(f"{len(steps)} steps, {sum(s for _, s in steps):.0f}s")
     if args.dry:

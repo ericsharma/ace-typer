@@ -29,6 +29,13 @@ class Timings:
     scroll: float = 2.5        # RIGHT on box title -> next box shown
 
 
+# Opt-in for the wired board only. The board times every press itself, so
+# the Bluetooth jitter that set the defaults is gone: 100 ms is 6 frames
+# held (key repeat starts at 16), 150 ms is 9 frames released. The waits at
+# screen changes stay as they are; those are where presses get eaten.
+FAST = Timings(press=0.10, gap=0.15)
+
+
 def box_steps(name, t: Timings, next_box=True):
     """(button or None, seconds) steps that name the current box and move on.
     Starts and ends with the cursor on the box title."""

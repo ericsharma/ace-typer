@@ -34,3 +34,18 @@ def test_compile_needs_params():
     assert not web.compile(text)["ok"]
     ok = web.compile(text, params={"1": {"****": "0197"}})
     assert ok["ok"] and ok["names"]["1"] == "6AB60197"
+
+
+def test_plan_fast_keeps_presses_and_screen_waits():
+    text = (FIX / "codegenerator_first_ace.txt").read_text()
+    normal = web.plan(text)
+    fast = web.plan(text, fast=True)
+    assert normal["ok"] and fast["ok"]
+    assert (normal["press_ms"], normal["gap_ms"], normal["fast"]) == (150, 370, False)
+    assert (fast["press_ms"], fast["gap_ms"], fast["fast"]) == (100, 150, True)
+    assert fast["presses"] == normal["presses"]
+    assert fast["seconds"] < normal["seconds"]
+    holds = {s for _, seg in fast["segments"] for b, s in seg if b is not None}
+    assert holds == {0.10}
+    waits = {s for _, seg in fast["segments"] for b, s in seg if b is None}
+    assert {1.5, 2.5, 3.5} <= waits  # screen-change waits unchanged

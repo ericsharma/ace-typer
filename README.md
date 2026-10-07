@@ -49,6 +49,9 @@ Paste a code, select **Preview**, check the table, then **Type Box N** (one
 box, then it moves to the next box so you can check each one) or **Type from
 Box N** (all boxes). The page shows the board and Pokémon Automation status,
 and can stop or start Pokémon Automation, which must be stopped while typing.
+**Fast** (also `type_code --fast`) holds each press 100 ms with 150 ms between
+presses instead of 150/370 ms; the waits at screen changes stay the same. It
+is for the wired board only and still being tested: check every name.
 **Stop** clears the board's queue and releases all buttons. It has no login:
 anyone who can reach the page can press buttons on the Switch.
 

@@ -5,10 +5,10 @@ from dataclasses import dataclass
 
 from .keyboard import plan_name, simulate
 
-# Game action -> Switch button (GBA SELECT = Minus, START = Plus).
+# Planner action -> Switch button.
 BUTTON = {
     "UP": "DPAD_UP", "DOWN": "DPAD_DOWN", "LEFT": "DPAD_LEFT", "RIGHT": "DPAD_RIGHT",
-    "A": "A", "B": "B", "PAGE": "A", "SELECT": "MINUS", "START": "PLUS",
+    "A": "A", "PAGE": "A",
 }
 
 
@@ -21,7 +21,7 @@ class Timings:
     gap: float = 0.25          # release after a button
     menu_open: float = 1.5     # box title A -> JUMP/WALLPAPER/NAME/CANCEL menu
     naming_open: float = 2.5   # NAME -> naming screen faded in
-    page_swap: float = 1.0     # SELECT -> next page usable
+    page_swap: float = 1.0     # PAGE -> next page usable
     full_to_ok: float = 1.0    # 8th character -> cursor moved to OK
     confirm_return: float = 3.5  # OK -> back on the PC box screen
     scroll: float = 2.5        # RIGHT on box title -> next box shown
@@ -42,7 +42,7 @@ def box_steps(name, t: Timings, next_box=True):
         last = i == len(actions) - 1
         if last:
             steps.append((None, t.confirm_return))
-        elif a in ("PAGE", "SELECT"):
+        elif a == "PAGE":
             steps.append((None, t.page_swap))
         else:
             steps.append((None, t.gap))

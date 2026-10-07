@@ -2,7 +2,7 @@
 pret/pokefirered src/naming_screen.c, plus a planner and a simulator.
 
 State = (page, x, y, saved)
-  page  : 0 UPPER, 1 lower, 2 OTHERS (SELECT cycles 0 -> 1 -> 2 -> 0)
+  page  : 0 UPPER, 1 lower, 2 OTHERS (PAGE cycles 0 -> 1 -> 2 -> 0)
   x, y  : cursor; x == column count of the page is the button column
           (y 0 PAGE, 1 BACK, 2 OK)
   saved : tButtonId of Task_HandleInput (row memory for the button column)
@@ -92,14 +92,14 @@ def start(state):
     return (page, COLS[page], 2, saved)
 
 
+# The planner uses only the D-pad and A: on the Switch rerelease, Plus is
+# not GBA START, so the on-screen PAGE and OK buttons replace SELECT/START.
 MOVES = {
     "UP": lambda s: dpad(s, 0, -1),
     "DOWN": lambda s: dpad(s, 0, 1),
     "LEFT": lambda s: dpad(s, -1, 0),
     "RIGHT": lambda s: dpad(s, 1, 0),
-    "PAGE": select,     # A on the on-screen PAGE button; same as SELECT
-    "SELECT": select,
-    "START": start,
+    "PAGE": select,     # A on the on-screen PAGE button
 }
 
 
@@ -110,25 +110,16 @@ def on_button(state, row):
 
 @dataclass(frozen=True)
 class Costs:
-    """Relative cost of each action. Page swaps carry their animation.
-
-    use_meta=False plans with the D-pad and A only (on-screen PAGE and OK):
-    on the Switch rerelease, Plus did not act as GBA START (calibration t1).
-    """
+    """Relative cost of each action. A page swap carries its animation."""
 
     move: float = 1.0
     page_swap: float = 4.0
-    use_meta: bool = False
 
     def allowed(self, action, state):
-        if action == "PAGE":
-            return on_button(state, 0)
-        if action in ("SELECT", "START"):
-            return self.use_meta
-        return True
+        return action != "PAGE" or on_button(state, 0)
 
     def of(self, action):
-        return self.page_swap if action in ("PAGE", "SELECT") else self.move
+        return self.page_swap if action == "PAGE" else self.move
 
 
 def _search(state, is_goal, costs):
@@ -172,9 +163,8 @@ def path_to_char(state, target, costs=Costs()):
 
 def plan_name(name, costs=Costs()):
     """Actions that type `name` from a freshly opened box-naming screen and
-    confirm it: UP/DOWN/LEFT/RIGHT, PAGE (A on the PAGE button), A, and
-    SELECT/START only with use_meta. "WAIT_FULL" follows an 8th character
-    (the game moves the cursor to OK)."""
+    confirm it: UP/DOWN/LEFT/RIGHT, PAGE (A on the PAGE button) and A.
+    "WAIT_FULL" follows an 8th character (the game moves the cursor to OK)."""
     if len(name) > MAX_CHARS:
         raise ValueError(f"{name!r} is longer than {MAX_CHARS} characters")
     if not name.strip(" "):

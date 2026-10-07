@@ -1,6 +1,11 @@
 """Type a pasted box code into the PC boxes.
 
   ./run ace_typer.type_code CODE.txt [--code N] [--no-switch] [--dry]
+                                     [--controller wired|nxbt] [--port DEV]
+
+The default controller is the wired ESP32-S3 board (see wired.py); run this
+on the machine the board's COM port is plugged into, with Pokémon Automation
+stopped. --controller nxbt uses the nxbt web app instead.
 
 Start state: PC "Move Pokémon", cursor on the title of Box 1.
 Boxes are named in order 1..last listed box; unlisted and "leave as is"
@@ -12,7 +17,6 @@ import sys
 
 from .macro import box_and_advance, build_steps, preview
 from .parse import ParseError, parse
-from .send import Controller
 
 
 def main():
@@ -24,6 +28,9 @@ def main():
     ap.add_argument("--from", dest="first", type=int, default=1,
                     help="start at this box (cursor on its title)")
     ap.add_argument("--to", dest="last", type=int, default=None, help="stop after this box")
+    ap.add_argument("--controller", choices=("wired", "nxbt"), default="wired",
+                    help="wired = ESP32-S3 board on --port (default); nxbt = nxbt web app")
+    ap.add_argument("--port", default=None, help="wired board serial port (default /dev/pa-esp32s3)")
     ap.add_argument("--box", type=int, default=None,
                     help="type only this box, then move to the next box that has a name "
                          "(cursor must start on this box's title)")
@@ -50,11 +57,18 @@ def main():
     print(f"{len(steps)} steps, {sum(s for _, s in steps):.0f}s")
     if args.dry:
         return
-    c = Controller()
+    if args.controller == "wired":
+        from .wired import DEFAULT_PORT, WiredController
+        c = WiredController(args.port or DEFAULT_PORT)
+    else:
+        from .send import Controller
+        c = Controller()
     try:
-        c.run(steps)
+        report = c.run(steps)
     finally:
         c.close()
+    if report is not None and not report["ok"]:
+        sys.exit("a press was not held as planned; check the box names before triggering ACE")
     print("done; compare every box name with the preview before triggering ACE")
 
 

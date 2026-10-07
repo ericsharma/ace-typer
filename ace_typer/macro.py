@@ -70,24 +70,31 @@ def steps_to_macro(steps):
     return "\n".join(lines)
 
 
-def build_steps(code, timings=Timings(), first=1, last=None):
-    """Steps for boxes first..last; the cursor must start on Box `first`'s title."""
+def box_segments(code, timings=Timings(), first=1, last=None):
+    """[(box number, steps)] for boxes first..last; the cursor must start on
+    Box `first`'s title. A skipped box is one RIGHT tap; the last box does not
+    scroll on."""
     plan = [(n, name) for n, name in code.plan()
             if n >= first and (last is None or n <= last)]
     if not plan:
         raise ValueError(f"no boxes in range {first}..{last}")
-    steps = []
+    segments = []
     for i, (n, name) in enumerate(plan):
         is_last = i == len(plan) - 1
         if name is None:
             if not is_last:
-                steps += [("RIGHT", timings.press), (None, timings.scroll)]
+                segments.append((n, [("RIGHT", timings.press), (None, timings.scroll)]))
             continue
         actions = plan_name(name)
         if simulate(actions) != name:
             raise AssertionError(f"box {n}: planner/simulator disagree for {name!r}")
-        steps += box_steps(name, timings, next_box=not is_last)
-    return steps
+        segments.append((n, box_steps(name, timings, next_box=not is_last)))
+    return segments
+
+
+def build_steps(code, timings=Timings(), first=1, last=None):
+    """Steps for boxes first..last; the cursor must start on Box `first`'s title."""
+    return [step for _, steps in box_segments(code, timings, first, last) for step in steps]
 
 
 def box_and_advance(code, n, timings=Timings()):

@@ -5,12 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ace-typer"
 version = "0.1.0"
-description = "Type Pokémon FireRed/LeafGreen ACE box-name codes with an nxbt virtual controller"
+description = "Type Pokémon FireRed/LeafGreen ACE box-name codes with a wired PABotBase2 controller or nxbt"
 requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
 client = ["python-socketio[client]"]
+wired = ["pyserial"]
+
+[project.scripts]
+ace-typer-web = "ace_typer.server:main"
 
 [tool.setuptools]
 packages = ["ace_typer"]
+
+[tool.setuptools.package-data]
+ace_typer = ["static/*.html"]

@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ACE Typer</title>
+<style>
+  :root {
+    --bg: #0d0f15; --card: #151924; --card2: #1b2030; --line: #262c3d;
+    --text: #e7e9f0; --muted: #8a93a8; --accent: #8b6cff; --accent2: #22d3ee;
+    --ok: #34d399; --warn: #fbbf24; --err: #fb7185;
+    --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; color: var(--text);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #2a1f5c55, transparent),
+                radial-gradient(900px 500px at 110% 0%, #0e4d5c44, transparent), var(--bg);
+  }
+  main { max-width: 980px; margin: 0 auto; padding: 28px 18px 60px; }
+  header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
+  h1 { margin: 0; font-size: 26px; letter-spacing: -0.02em; }
+  h1 span {
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .sub { color: var(--muted); font-size: 13px; }
+  .pills { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px;
+    border: 1px solid var(--line); border-radius: 999px; background: var(--card); font-size: 13px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  .dot.warn { background: var(--warn); box-shadow: 0 0 8px var(--warn); }
+  .dot.err { background: var(--err); box-shadow: 0 0 8px var(--err); }
+  .pill button { padding: 2px 10px; font-size: 12px; }
+  .card {
+    background: linear-gradient(180deg, var(--card), #121620); border: 1px solid var(--line);
+    border-radius: 16px; padding: 18px; margin-bottom: 16px;
+    box-shadow: 0 10px 30px #0006;
+  }
+  .card h2 { margin: 0 0 12px; font-size: 14px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  textarea {
+    width: 100%; min-height: 150px; resize: vertical; padding: 12px; border-radius: 12px;
+    border: 1px solid var(--line); background: #0b0e14; color: var(--text); font: 13px/1.5 var(--mono);
+  }
+  textarea:focus, select:focus, input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
+  button {
+    border: 1px solid var(--line); background: var(--card2); color: var(--text); border-radius: 10px;
+    padding: 9px 16px; font: inherit; font-weight: 600; cursor: pointer; transition: .15s;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .4; cursor: not-allowed; }
+  button.primary { border: 0; background: linear-gradient(90deg, var(--accent), #6d4dff); }
+  button.primary:hover:not(:disabled) { filter: brightness(1.12); }
+  button.danger { border-color: #fb718566; color: var(--err); }
+  select, input.param {
+    background: #0b0e14; color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 10px; font: inherit;
+  }
+  input.param { font-family: var(--mono); padding: 4px 6px; }
+  label.check { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); cursor: pointer; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+  .seg button { border: 0; border-radius: 0; background: transparent; color: var(--muted); }
+  .seg button.on { background: var(--card2); color: var(--text); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 12px; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+  td { padding: 7px 10px; border-bottom: 1px solid #1f2433; vertical-align: top; }
+  tr.typing td { background: #8b6cff1f; }
+  tr.typing td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  tr.done td:first-child::after { content: " ✓"; color: var(--ok); }
+  .name { font-family: var(--mono); background: #0b0e14; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; white-space: pre; }
+  .muted { color: var(--muted); }
+  .note { font-size: 13px; color: var(--warn); }
+  .msg { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: #0b0e14; border: 1px solid var(--line); white-space: pre-wrap; }
+  .msg.ok { border-color: #34d39966; color: var(--ok); }
+  .msg.err { border-color: #fb718566; color: var(--err); }
+  .msg.run { border-color: #8b6cff66; }
+  .msg:empty { display: none; }
+  .badge { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: #34d3991a; color: var(--ok); border: 1px solid #34d39955; }
+  .warnline { color: var(--warn); font-size: 13px; margin: 6px 0; }
+  .progress { height: 10px; border-radius: 999px; background: #0b0e14; border: 1px solid var(--line); overflow: hidden; margin-top: 14px; }
+  .progress > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width .8s linear; }
+  .ptext { display: flex; justify-content: space-between; color: var(--muted); font-size: 13px; margin-top: 6px; font-variant-numeric: tabular-nums; }
+  .hint { color: var(--muted); font-size: 13px; margin-top: 10px; }
+  details { color: var(--muted); }
+  summary { cursor: pointer; }
+  pre.log { font: 12px/1.5 var(--mono); max-height: 220px; overflow: auto; background: #0b0e14; padding: 10px; border-radius: 10px; border: 1px solid var(--line); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span>ACE</span> Typer</h1>
+      <div class="sub">FireRed box codes · wired controller</div>
+    </div>
+    <div class="pills">
+      <div class="pill"><span class="dot" id="board-dot"></span><span id="board-text">Board not checked</span>
+        <button id="check-btn" onclick="checkBoard()">Check</button></div>
+      <div class="pill"><span class="dot" id="pa-dot"></span><span id="pa-text">Pokémon Automation</span>
+        <button id="pa-btn" onclick="togglePA()">…</button></div>
+    </div>
+  </header>
+
+  <section class="card">
+    <h2>Code</h2>
+    <textarea id="text" spellcheck="false" placeholder="Paste CodeGenerator output, character codes (Box 2: P R o / F Q m _ [PRo/FQm ]) or Hex Writer codes (Box 3: C6E9D7DF)"></textarea>
+    <div class="row">
+      <button class="primary" onclick="preview()">Preview</button>
+      <label class="check"><input type="checkbox" id="switch" checked> Switch version (use the Switch variants)</label>
+      <span id="code-row" class="hidden">Code <select id="code" onchange="renderCode()"></select></span>
+    </div>
+    <div id="preview-msg" class="msg"></div>
+  </section>
+
+  <section class="card hidden" id="boxes-card">
+    <h2>Boxes <span id="raw-badge" class="badge hidden">matches Raw data byte for byte</span></h2>
+    <div id="warnings"></div>
+    <table><thead><tr><th style="width:80px">Box</th><th>Name</th><th>Notes</th></tr></thead>
+      <tbody id="boxes"></tbody></table>
+  </section>
+
+  <section class="card hidden" id="type-card">
+    <h2>Type</h2>
+    <div class="row" style="margin-top:0">
+      <div class="seg">
+        <button id="mode-one" class="on" onclick="setMode(true)">One box</button>
+        <button id="mode-all" onclick="setMode(false)">All boxes</button>
+      </div>
+      <span>from <select id="first" onchange="updateHint()"></select></span>
+      <button class="primary" id="type-btn" onclick="typeCode()">Type</button>
+      <button class="danger" id="stop-btn" onclick="stopRun()" disabled>Stop</button>
+    </div>
+    <div class="hint" id="hint"></div>
+    <div id="progress-wrap" class="hidden">
+      <div class="progress"><div id="bar"></div></div>
+      <div class="ptext"><span id="ptext-box"></span><span id="ptext-time"></span></div>
+    </div>
+    <div id="run-msg" class="msg"></div>
+  </section>
+
+  <details class="card"><summary>Log</summary><pre class="log" id="log"></pre></details>
+</main>
+
+<script>
+const S = { preview: null, oneBox: true, typed: new Set(), lastRun: null, state: null };
+const $ = id => document.getElementById(id);
+const esc = t => { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; };
+const show = t => t.replaceAll(" ", "␣");
+const fmt = ms => { const s = Math.max(0, Math.round(ms / 1000)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`; };
+
+async function api(path, body) {
+  const r = await fetch(path, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body || {}) });
+  return r.json();
+}
+function msg(id, text, kind) { const el = $(id); el.textContent = text || ""; el.className = "msg" + (kind ? " " + kind : ""); }
+
+async function preview() {
+  const text = $("text").value;
+  if (!text.trim()) return msg("preview-msg", "Paste a code first.", "err");
+  const r = await api("/api/preview", { text, switch: $("switch").checked });
+  S.preview = r; S.typed.clear();
+  if (!r.ok) {
+    $("boxes-card").classList.add("hidden"); $("type-card").classList.add("hidden");
+    return msg("preview-msg", r.error, "err");
+  }
+  const sel = $("code"); sel.innerHTML = "";
+  r.codes.forEach((c, i) => sel.add(new Option(`${c.title} (${c.kind === "hex" ? "Hex Writer" : "characters"})`, i + 1)));
+  $("code-row").classList.toggle("hidden", r.codes.length < 2);
+  renderCode();
+}
+
+function currentCode() { return S.preview.codes[parseInt($("code").value) - 1]; }
+
+function renderCode() {
+  const code = currentCode();
+  $("raw-badge").classList.toggle("hidden", !code.raw_verified);
+  $("warnings").innerHTML = code.warnings.map(w => `<div class="warnline">⚠ ${esc(w)}</div>`).join("");
+  $("boxes").innerHTML = code.boxes.map(b => {
+    let name;
+    if (b.action === "type") name = `<span class="name">${esc(show(b.name))}</span>`;
+    else if (b.action === "leave") name = `<span class="muted">leave as is</span>`;
+    else if (b.action === "unchanged") name = `<span class="muted">not in code</span>`;
+    else {
+      name = `<span class="name">${esc(b.template)}</span> ` + (b.template.match(/[*&%$]+/g) || []).map(run =>
+        `<input class="param" data-box="${b.box}" data-run="${esc(run)}" maxlength="${run.length}" size="${run.length + 1}" placeholder="${esc(run)}">`).join(" ");
+    }
+    let notes = b.warnings.map(esc);
+    if (b.note) notes.push(esc(b.note));
+    return `<tr id="row-${b.box}"><td>Box ${b.box}</td><td>${name}</td><td class="note">${notes.join("<br>")}</td></tr>`;
+  }).join("");
+  const first = $("first"); first.innerHTML = "";
+  code.boxes.filter(b => b.action === "type" || b.action === "fill").forEach(b => first.add(new Option(`Box ${b.box}`, b.box)));
+  $("boxes-card").classList.remove("hidden"); $("type-card").classList.remove("hidden");
+  const n = code.boxes.filter(b => b.action === "type").length;
+  msg("preview-msg", `${n} box name${n === 1 ? "" : "s"} to type. Check every name, then type.`, "ok");
+  updateHint(); paintRows();
+}
+
+function setMode(one) {
+  S.oneBox = one;
+  $("mode-one").classList.toggle("on", one); $("mode-all").classList.toggle("on", !one);
+  updateHint();
+}
+function updateHint() {
+  const b = $("first").value;
+  $("hint").textContent = `Before you type: PC → MOVE POKéMON, cursor on the title of Box ${b}, hand empty. ` +
+    (S.oneBox ? `Types Box ${b} only, then moves to the next box to type.` : `Types every box from Box ${b} to the end.`);
+  $("type-btn").textContent = S.oneBox ? `Type Box ${b}` : `Type from Box ${b}`;
+}
+function params() {
+  const p = {};
+  document.querySelectorAll("input.param").forEach(i => { (p[i.dataset.box] ||= {})[i.dataset.run] = i.value.trim(); });
+  return p;
+}
+
+async function typeCode() {
+  const r = await api("/api/type", {
+    text: $("text").value, code: parseInt($("code").value || 1), first: parseInt($("first").value),
+    one_box: S.oneBox, switch: $("switch").checked, params: params(),
+  });
+  if (!r.ok) return msg("run-msg", r.error, "err");
+  S.lastRun = r;
+  msg("run-msg", `Typing Box${r.start_box === r.end_box ? " " + r.start_box : "es " + r.start_box + "–" + r.end_box} · ${r.presses} presses. Do not touch the Switch.`, "run");
+  poll();
+}
+async function stopRun() { await api("/api/stop"); poll(); }
+
+async function checkBoard() {
+  $("check-btn").disabled = true; $("board-text").textContent = "Checking…";
+  await api("/api/check"); $("check-btn").disabled = false; poll();
+}
+async function togglePA() {
+  const running = S.state && S.state.pa === "active";
+  $("pa-btn").disabled = true;
+  const r = await api("/api/pa", { action: running ? "stop" : "start" });
+  $("pa-btn").disabled = false;
+  if (!r.ok) msg("run-msg", r.error, "err");
+  poll();
+}
+
+function paintRows() {
+  const run = S.state && S.state.run;
+  document.querySelectorAll("#boxes tr").forEach(tr => {
+    const box = parseInt(tr.id.slice(4));
+    tr.classList.toggle("done", S.typed.has(box));
+    tr.classList.toggle("typing", !!(run && run.state === "typing" && run.box === box));
+  });
+}
+
+let wasBusy = false;
+function render(st) {
+  S.state = st;
+  // Pokémon Automation
+  const pa = st.pa;
+  $("pa-dot").className = "dot " + (pa === "active" ? "warn" : pa === "inactive" ? "ok" : "");
+  $("pa-text").textContent = pa === "active" ? "Pokémon Automation running" : pa === "inactive" ? "Pokémon Automation stopped" : "Pokémon Automation " + pa;
+  $("pa-btn").textContent = pa === "active" ? "Stop" : "Start";
+  $("pa-btn").disabled = st.busy;
+  // Board
+  const b = st.board;
+  if (b) {
+    $("board-dot").className = "dot " + (b.ok ? "ok" : "err");
+    $("board-text").textContent = b.ok ? "Board ready · player 1" : "Board: " + b.error;
+  }
+  $("check-btn").disabled = st.busy || pa === "active";
+  // Run
+  const run = st.run;
+  $("type-btn").disabled = st.busy || pa === "active";
+  $("stop-btn").disabled = !st.busy;
+  if (pa === "active" && !st.busy) $("hint").textContent = "Stop Pokémon Automation first: it holds the board.";
+  else if (S.preview && S.preview.ok) updateHint();
+  if (run) {
+    $("progress-wrap").classList.remove("hidden");
+    const pct = run.total_ms ? 100 * run.done_ms / run.total_ms : 0;
+    $("bar").style.width = Math.min(100, pct) + "%";
+    $("ptext-box").textContent = run.state === "typing" ? `Typing Box ${run.box}` : run.state;
+    $("ptext-time").textContent = `${fmt(run.done_ms)} / ${fmt(run.total_ms)}`;
+    if (wasBusy && !st.busy) finished(run);
+  }
+  wasBusy = st.busy;
+  $("log").textContent = st.log.join("\n");
+  paintRows();
+}
+
+function finished(run) {
+  const p = run.plan;
+  if (run.state === "done" || run.state === "timing") {
+    for (let n = p.start_box; n <= p.end_box; n++) if (p.names[String(n)] !== undefined) S.typed.add(n);
+  }
+  const timing = run.report ? "\n" + run.report.text : "";
+  if (run.state === "done") {
+    if (p.next_box) {
+      $("first").value = p.next_box; updateHint();
+      msg("run-msg", `Box ${p.start_box} typed. Check its name on screen, then type Box ${p.next_box}.${timing}`, "ok");
+    } else {
+      msg("run-msg", `Done. Compare every box name with the table before you trigger ACE.${timing}`, "ok");
+    }
+  } else if (run.state === "timing") msg("run-msg", `Typed, but a press was off its plan. Check the names.${timing}`, "err");
+  else if (run.state === "stopped") msg("run-msg", "Stopped. All buttons released. The box being typed is incomplete.", "err");
+  else if (run.state === "error") msg("run-msg", run.error, "err");
+}
+
+let timer = null;
+async function poll() {
+  clearTimeout(timer);
+  try { render(await (await fetch("/api/state")).json()); } catch (e) { /* server restarting */ }
+  timer = setTimeout(poll, S.state && S.state.busy ? 1000 : 4000);
+}
+poll();
+</script>
+</body>
+</html>

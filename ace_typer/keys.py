@@ -231,30 +231,78 @@ def read_keyboard(on_key, log=print, stop=None):
 
 
 class Overlay:
-    """Text drawn by the Switch app's mpv, through its JSON IPC socket."""
+    """Text drawn by the Switch app's mpv, through its JSON IPC socket.
+
+    One connection, held open: mpv removes an osd-overlay as soon as the IPC
+    client that created it disconnects, so a connect-send-close per update
+    draws nothing that lasts. The connection is checked on every call, so a
+    restarted mpv (new socket, no overlay) gets the text again.
+    """
 
     def __init__(self, path):
         self.path = path
         self._last = None
+        self._sock = None
 
-    def _send(self, command):
-        with socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as s:
+    def _close(self):
+        if self._sock is not None:
+            try:
+                self._sock.close()
+            except OSError:
+                pass
+        self._sock = None
+        self._last = None
+
+    def _connect(self):
+        s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        try:
             s.settimeout(1)
             s.connect(self.path)
-            s.sendall(json.dumps({"command": command}).encode() + b"\n")
+            s.setblocking(False)
+        except OSError:
+            s.close()
+            raise
+        self._sock = s
+        # Replies are never read for their content; events are not wanted.
+        self._write({"command": ["disable_event", "all"]})
+
+    def _write(self, msg):
+        self._sock.setblocking(True)
+        self._sock.settimeout(1)
+        try:
+            self._sock.sendall(json.dumps(msg).encode() + b"\n")
+        finally:
+            self._sock.setblocking(False)
+
+    def _alive(self):
+        """Drain mpv's replies; False once mpv has closed its end."""
+        try:
+            while True:
+                data = self._sock.recv(65536)
+                if not data:
+                    return False
+        except BlockingIOError:
+            return True
+        except OSError:
+            return False
 
     def show(self, text):
         """Draw ASS text; no-op when unchanged. False when mpv is not there."""
-        if text == self._last:
+        if self._sock is not None and not self._alive():
+            self._close()
+        if self._sock is not None and text == self._last:
             return True
         if not os.path.exists(self.path):
-            self._last = None
+            self._close()
             return False
         try:
-            self._send({"name": "osd-overlay", "id": 7, "format": "ass-events",
-                        "data": text, "res_x": 1920, "res_y": 1080})
+            if self._sock is None:
+                self._connect()
+            self._write({"command": {
+                "name": "osd-overlay", "id": 7, "format": "ass-events",
+                "data": text, "res_x": 1920, "res_y": 1080}})
         except OSError:
-            self._last = None
+            self._close()
             return False
         self._last = text
         return True

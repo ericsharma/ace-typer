@@ -1,4 +1,5 @@
 import json
+import os
 import socket
 import struct
 import threading
@@ -174,25 +175,73 @@ def test_overlay_text_escapes_and_shows_legend():
     assert "Arrows" not in keys.overlay_text("Keyboard → Switch", True, False)
 
 
-def test_overlay_sends_osd_overlay_to_mpv(tmp_path):
-    path = str(tmp_path / "mpv.sock")
+def _fake_mpv(path):
+    """A Unix socket that records each client's JSON lines until it hangs up."""
     srv = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
     srv.bind(path)
-    srv.listen(1)
-    got = []
+    srv.listen(4)
+    conns = []
 
-    def accept():
-        conn, _ = srv.accept()
-        got.append(json.loads(conn.makefile().readline()))
-        conn.close()
+    def serve():
+        while True:
+            try:
+                conn, _ = srv.accept()
+            except OSError:
+                return
+            lines = []
+            conns.append((conn, lines))
+            threading.Thread(target=lambda c=conn, l=lines: [
+                l.append(json.loads(x)) for x in c.makefile()], daemon=True).start()
 
-    t = threading.Thread(target=accept)
-    t.start()
+    threading.Thread(target=serve, daemon=True).start()
+    return srv, conns
+
+
+def _wait(cond, timeout=2):
+    end = time.time() + timeout
+    while time.time() < end:
+        if cond():
+            return True
+        time.sleep(0.01)
+    return False
+
+
+def _overlays(lines):
+    return [m["command"]["data"] for m in lines
+            if isinstance(m["command"], dict) and m["command"]["name"] == "osd-overlay"]
+
+
+def test_overlay_holds_one_connection_open(tmp_path):
+    # mpv drops an osd-overlay when its client disconnects, so the overlay
+    # must reuse one connection rather than open one per update.
+    path = str(tmp_path / "mpv.sock")
+    srv, conns = _fake_mpv(path)
     overlay = keys.Overlay(path)
     assert overlay.show("hello")
-    t.join(2)
-    assert got[0]["command"]["name"] == "osd-overlay"
-    assert got[0]["command"]["data"] == "hello"
     assert overlay.show("hello")          # unchanged: nothing sent
+    assert overlay.show("world")
+    assert _wait(lambda: conns and _overlays(conns[0][1]) == ["hello", "world"])
+    assert len(conns) == 1
     srv.close()
+
+
+def test_overlay_redraws_after_mpv_restarts(tmp_path):
+    path = str(tmp_path / "mpv.sock")
+    srv, conns = _fake_mpv(path)
+    overlay = keys.Overlay(path)
+    assert overlay.show("hello")
+    assert _wait(lambda: conns and _overlays(conns[0][1]) == ["hello"])
+    # mpv quits: its end closes and the socket goes away.
+    srv.close()
+    conns[0][0].shutdown(socket.SHUT_RDWR)
+    os.unlink(path)
+    assert _wait(lambda: not overlay.show("hello"))
+    # A new mpv: the same text is drawn again, on a new connection.
+    srv, conns = _fake_mpv(path)
+    assert overlay.show("hello")
+    assert _wait(lambda: conns and _overlays(conns[0][1]) == ["hello"])
+    srv.close()
+
+
+def test_overlay_without_mpv(tmp_path):
     assert not keys.Overlay(str(tmp_path / "missing.sock")).show("x")
